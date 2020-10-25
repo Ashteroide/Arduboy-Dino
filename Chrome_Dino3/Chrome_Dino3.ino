@@ -1,7 +1,6 @@
 // Chrome Dino v3
 // 22 October, 2020
 // Ashlee J
-// VSCode Test
 
 #include <Arduboy2.h>
 #include <ArduboyTones.h>
