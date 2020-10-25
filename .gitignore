@@ -18,3 +18,5 @@ Chrome_Dino3/.vscode/settings.json
 .vscode/settings.json
 Chrome_Dino3/compile.command
 Chrome_Dino3/upload.command
+.vscode/arduino.json
+.vscode/c_cpp_properties.json
