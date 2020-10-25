@@ -3,8 +3,10 @@
 // Ashlee J
 
 #include <Arduboy2.h>
+#include <ArduboyTones.h>
 
 Arduboy2 arduboy;
+ArduboyTones sound(arduboy.audio.enabled);
 
 #include "dino.h"
 #include "dinoDuck.h"
@@ -186,7 +188,7 @@ void updateDino()
     {
         dino.jumpVel = -2;
         dino.jump = true;
-        tone(500, 100);
+        sound.tone(500, 100);
     }
 
     // If dino.y is smaller than dino.maxJump move Dino down
