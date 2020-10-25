@@ -1,5 +1,0 @@
-{
-    "port": "/dev/tty.usbmodem14201",
-    "board": "arduboy-homemade:avr:arduboy-homemade",
-    "configuration": "based_on=promicro,boot=org,core=arduino-core,display=sh1106,flashselect=sda"
-}
