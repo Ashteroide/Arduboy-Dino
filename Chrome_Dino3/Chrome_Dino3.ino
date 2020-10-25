@@ -140,6 +140,9 @@ void updateMenu()
 void drawMenu()
 {
     Sprites::drawSelfMasked(0, 0, TitleScreenImg, 0);
+    
+    arduboy.setCursor(34, 30);
+    arduboy.println(F("A to Start"));
 }
 
 void updateGame()
@@ -203,11 +206,6 @@ void updateDino()
     if( (dino.y + dinoHeight) > cactus.y && (dino.x + dinoWidth - 4) > cactus.x && (dino.x + dinoWidth - 4) < cactus.x + cactusWidth ) gameState = GameState::End;
 
     dino.y += dino.vel;
-
-    Serial.print(dino.x);
-    Serial.print(",");
-    Serial.println(dino.y);
-
 }
 
 void drawDino()
@@ -232,7 +230,11 @@ void drawPtero()
 void updateCactus()
 {
     if(cactus.x > -20) cactus.x -= cactus.spd;
-    else cactus.x = screen.width + random(80, 120);
+    else
+    {
+        cactus.x = screen.width + random(cactusWidth, 100);
+        Serial.println(cactus.x);
+    }
 }
 
 void drawCactus()
