@@ -1,2 +1,8 @@
 # Arduboy-Dino
-Chrome Dino for the Arduboy
+
+The portable version of your favourite non-internet game, CHROME DINO!! Available for the Arduboy
+
+
+**Preview:**
+
+![Chrome Dino Preview](/Images/TitleScreen.png)
