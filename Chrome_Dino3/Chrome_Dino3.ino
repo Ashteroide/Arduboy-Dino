@@ -21,35 +21,31 @@ struct Screen
 {
     int width, height;
 };
-Screen screen = { Arduboy2::width(), Arduboy2::height() };
+Screen screen { Arduboy2::width(), Arduboy2::height() };
 
 // Game Structure
 struct Game
 {
-    int frame, maxFrame;
-    uint16_t score;
+    int score, frame;
 };
-Game game = { 0, 32, 0 };
+Game game { 0, 0 };
+
+const int groundHeight = 62;
+const int maxFrame = 32;
 
 struct Font
 {
     int width, height;
 };
-Font font = { 6, 8 };
-
-struct Velocity
-{
-    const float spd[4];
-};
-Velocity velo = { 0, 0.5, 1, 2 };
+Font font { 6, 8 };
 
 // Dino Structure
 struct Dino
 {
-    float x, y, vel, maxJump;
+    float x, y, jumpVel, maxJump;
     bool jump, fall, duck;
 };
-Dino dino = { 5, (screen.height - 2 - dinoHeight), 0, 10, false, false, false };
+Dino dino { 5, (screen.height - 2 - dinoHeight), 0, 10, false, false, false };
 
 // Pterodactyl Structure
 struct Pterodactyl
@@ -57,20 +53,15 @@ struct Pterodactyl
     float x, y, spd;
     bool spawn;
 };
-Pterodactyl ptero = { screen.width, (screen.height - dinoHeight - random(6, 10)) };
+Pterodactyl ptero { screen.width, (screen.height - dinoHeight - random(6, 10)) };
 
 // Cactus Structure
-struct Cactus
+struct Object
 {
     float x, y, spd;
 };
-Cactus cactus = { (screen.width + random(80, 120)), 43, 2 };
-
-struct Cloud
-{
-    int x, y, spd;
-};
-Cloud cloud = { screen.width + random(0, 60), 43, 1 };
+Object cactus { screen.width, 43, 2 };
+Object cloud { screen.width, 43, 1 };
 
 // Game State
 enum class GameState
@@ -86,18 +77,16 @@ void reset()
 {
     arduboy.initRandomSeed();
 
-    dino = { 5, (screen.height - 2 - dinoHeight), 0, 10, false, false, false };
+    dino = { 5, (groundHeight - dinoHeight), 0, 10, false, false, false };
     ptero = { screen.width, (screen.height - dinoHeight - random(6, 10)) };
     cactus = { (screen.width + random(80, 120)), 43, 2 };
-    game = { 0, 32, 0 };
+    game = { 0, 0 };
 }
 
 void setup()
 {
     arduboy.begin();
     arduboy.clear();
-
-    reset();
 }
 
 void loop()
@@ -151,17 +140,22 @@ void updateGame()
     updateCloud();
 
     ++game.frame;
-    if(game.frame % game.maxFrame) game.score += 1;
+
+    if((game.frame % maxFrame) != 0) ++game.score;
 }
 
 void drawGame()
 {
-    arduboy.drawLine(0, (screen.height - 2), screen.width, (screen.height - 2));
+    arduboy.drawLine(0, groundHeight, screen.width, groundHeight);
     
-    if(game.score >= 10 && game.score < 100) arduboy.setCursor( ((screen.width / 2) - font.width), 5);
-    else if(game.score >= 100 && game.score < 1000) arduboy.setCursor( ((screen.width / 2) - ((font.width * 3) / 2)), 5);
-    else if(game.score >= 1000) arduboy.setCursor( ((screen.width / 2) - (font.width * 2)), 5);
-    else arduboy.setCursor( (screen.width / 2) - (font.width / 2), 5);
+    if(game.score < 100)
+        arduboy.setCursor( ((screen.width / 2) - font.width), 5);
+    else if(game.score < 1000)
+        arduboy.setCursor( ((screen.width / 2) - ((font.width * 3) / 2)), 5);
+    else if(game.score < 10000)
+        arduboy.setCursor( ((screen.width / 2) - (font.width * 2)), 5);
+    else
+        arduboy.setCursor( (screen.width / 2) - (font.width / 2), 5);
 
     arduboy.print(game.score);
 
@@ -174,37 +168,41 @@ void drawGame()
 // Dino
 void updateDino()
 {
-    // If dino.vel is other than 0 the Dino is falling
-    if((dino.vel >= velo.spd[1]) && (dino.vel <= velo.spd[3])) dino.fall = true;
-    else dino.fall = false;
+    // If dino.jumpVel is other than 0 the Dino is falling
+    if((dino.jumpVel >= 1) && (dino.jumpVel <= 2))
+        dino.fall = true;
+    else
+        dino.fall = false;
 
-    // If Dino is equal to ground line then jumping is false
-    if(dino.y >= (screen.height - 2 - dinoHeight)) dino.jump = false;
+    // If dino.y is on ground line dino.jumpVel is 0
+    if(dino.y >= (groundHeight - dinoHeight))
+    {
+        dino.jumpVel = 0;
+        dino.fall = false;
+        dino.jump = false;
+    }
+
     if(arduboy.justPressed(UP_BUTTON) && !dino.jump)
     {
-        dino.vel = -velo.spd[3];
+        dino.jumpVel = -2;
         dino.jump = true;
         tone(500, 100);
     }
 
     // If dino.y is smaller than dino.maxJump move Dino down
-    if(dino.y <= dino.maxJump) dino.vel = velo.spd[3];
+    if(dino.y <= dino.maxJump)
+        dino.jumpVel = 2;
 
-    // If dino.y = (dino.maxJump + 6) the dino.vel is 1 to slow speed
-    if(dino.y == (dino.maxJump + 6) && dino.jump && !dino.fall) dino.vel = -velo.spd[2];
-
-    // If dino.y is on ground line dino.vel is 0
-    if(dino.y >= (screen.height - 2 - dinoHeight) && !dino.jump)
-    {
-        dino.vel = velo.spd[0];
-        dino.fall = false;
-    }
+    // If dino.y = (dino.maxJump + 6) the dino.jumpVel is 1 to slow speed
+    if(dino.y == (dino.maxJump + 6) && dino.jump && !dino.fall)
+        dino.jumpVel = -1;
 
     // Collision Detection
     // if( (dino.y + dinoHeight) > cactus.y && (dino.x + dinoWidth - 4) > cactus.x && (dino.x + dinoWidth - 4) < cactus.x + cactusWidth); gameState = GameState::End;
-    if( (dino.y + dinoHeight) > cactus.y && (dino.x + dinoWidth - 4) > cactus.x && (dino.x + dinoWidth - 4) < cactus.x + cactusWidth ) gameState = GameState::End;
+    if( (dino.y + dinoHeight) > cactus.y && (dino.x + dinoWidth - 4) > cactus.x && (dino.x + dinoWidth - 4) < cactus.x + cactusWidth )
+        gameState = GameState::End;
 
-    dino.y += dino.vel;
+    dino.y += dino.jumpVel;
 }
 
 void drawDino()
