@@ -88,10 +88,10 @@ void reset()
 {
     arduboy.initRandomSeed();
 
-    Dino dino = { 5, (screen.height - 2 - dinoHeight), 0, 10, false, false, false };
-    Pterodactyl ptero = { screen.width, (screen.height - dinoHeight - random(6, 10)) };
-    Cactus cactus = { (screen.width + random(80, 120)), 43, 2 };
-    Game game = { 0, 32, 0 };
+    dino = { 5, (screen.height - 2 - dinoHeight), 0, 10, false, false, false };
+    ptero = { screen.width, (screen.height - dinoHeight - random(6, 10)) };
+    cactus = { (screen.width + random(80, 120)), 43, 2 };
+    game = { 0, 32, 0 };
 }
 
 void setup()
@@ -133,8 +133,8 @@ void loop()
 // Menu
 void updateMenu()
 {
-    if(arduboy.justPressed(A_BUTTON)) gameState = GameState::Game;
     reset();
+    if(arduboy.justPressed(A_BUTTON)) gameState = GameState::Game;
 }
 
 void drawMenu()
@@ -199,10 +199,14 @@ void updateDino()
     }
 
     // Collision Detection
-    if( (dino.y + dinoHeight) > cactus.y && (dino.x + dinoWidth - 4) > cactus.x && (dino.x + dinoWidth - 4) < cactus.x + cactusWidth); gameState = GameState::End;
-    if( (dino.x ))
+    // if( (dino.y + dinoHeight) > cactus.y && (dino.x + dinoWidth - 4) > cactus.x && (dino.x + dinoWidth - 4) < cactus.x + cactusWidth); gameState = GameState::End;
+    if( (dino.y + dinoHeight) > cactus.y && (dino.x + dinoWidth - 4) > cactus.x && (dino.x + dinoWidth - 4) < cactus.x + cactusWidth ) gameState = GameState::End;
 
     dino.y += dino.vel;
+
+    Serial.print(dino.x);
+    Serial.print(",");
+    Serial.println(dino.y);
 
 }
 
