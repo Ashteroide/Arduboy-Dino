@@ -19,11 +19,12 @@ ArduboyTones sound(arduboy.audio.enabled);
 #include "TitleScreen.h"
 
 // Screen Structure
-struct Screen
+struct Dimensions
 {
     int width, height;
 };
-Screen screen { Arduboy2::width(), Arduboy2::height() };
+Dimensions screen { Arduboy2::width(), Arduboy2::height() };
+Dimensions font { 6, 8 };
 
 // Game Structure
 struct Game
@@ -32,14 +33,8 @@ struct Game
 };
 Game game { 0, 0 };
 
-const int groundHeight = 62;
-const int maxFrame = 32;
-
-struct Font
-{
-    int width, height;
-};
-Font font { 6, 8 };
+constexpr uint8_t groundHeight = 62;
+constexpr int scoreInterval = 32;
 
 // Dino Structure
 struct Dino
@@ -48,6 +43,15 @@ struct Dino
     bool jump, fall, duck;
 };
 Dino dino { 5, (screen.height - 2 - dinoHeight), 0, 10, false, false, false };
+
+enum class DinoState
+{
+    Jumping,
+    Falling,
+    Running,
+    Ducking,
+};
+DinoState dinoState = DinoState::Running; 
 
 // Pterodactyl Structure
 struct Pterodactyl
@@ -70,7 +74,7 @@ enum class GameState
 {
     Menu,
     Game,
-    End,
+    End
 };
 GameState gameState = GameState::Menu;
 
@@ -122,8 +126,11 @@ void loop()
 // Menu
 void updateMenu()
 {
-    reset();
-    if(arduboy.justPressed(A_BUTTON)) gameState = GameState::Game;
+    if(arduboy.justPressed(A_BUTTON))
+    {
+        reset();
+        gameState = GameState::Game;
+    }
 }
 
 void drawMenu()
@@ -136,6 +143,25 @@ void drawMenu()
 
 void updateGame()
 {
+    switch(dinoState)
+    {
+        case DinoState::Running:
+            dinoRunning();
+            break;
+        
+        case DinoState::Jumping:
+            dinoJumping();
+            break;
+
+        case DinoState::Falling:
+            dinoFalling();
+            break;
+
+        case DinoState::Ducking:
+            dinoDucking();
+            break;
+    }
+
     updateDino();
     updatePtero();
     updateCactus();
@@ -143,7 +169,8 @@ void updateGame()
 
     ++game.frame;
 
-    if((game.frame % maxFrame) != 0) ++game.score;
+    if((game.frame % scoreInterval) != 0)
+        ++game.score;
 }
 
 void drawGame()
@@ -161,7 +188,6 @@ void drawGame()
 
     arduboy.print(game.score);
 
-    drawDino();
     drawPtero();
     drawCactus();
     drawCloud();
@@ -170,35 +196,6 @@ void drawGame()
 // Dino
 void updateDino()
 {
-    // If dino.jumpVel is other than 0 the Dino is falling
-    if((dino.jumpVel >= 1) && (dino.jumpVel <= 2))
-        dino.fall = true;
-    else
-        dino.fall = false;
-
-    // If dino.y is on ground line dino.jumpVel is 0
-    if(dino.y >= (groundHeight - dinoHeight))
-    {
-        dino.jumpVel = 0;
-        dino.fall = false;
-        dino.jump = false;
-    }
-
-    if(arduboy.justPressed(UP_BUTTON) && !dino.jump)
-    {
-        dino.jumpVel = -2;
-        dino.jump = true;
-        sound.tone(500, 100);
-    }
-
-    // If dino.y is smaller than dino.maxJump move Dino down
-    if(dino.y <= dino.maxJump)
-        dino.jumpVel = 2;
-
-    // If dino.y = (dino.maxJump + 6) the dino.jumpVel is 1 to slow speed
-    if(dino.y == (dino.maxJump + 6) && dino.jump && !dino.fall)
-        dino.jumpVel = -1;
-
     // Collision Detection
     if( (dino.y + dinoHeight) > cactus.y && (dino.x + dinoWidth - 4) > cactus.x && (dino.x + dinoWidth - 4) < cactus.x + cactusWidth )
         gameState = GameState::End;
@@ -206,17 +203,54 @@ void updateDino()
     dino.y += dino.jumpVel;
 }
 
-void drawDino()
+void dinoRunning()
 {
-    if( ((game.frame % 8) / 4) && !dino.jump && !dino.duck)
-        Sprites::drawSelfMasked(dino.x, dino.y, dinoImg, 1);
-    else if( !((game.frame % 8) / 4) && !dino.jump && !dino.duck)
-        Sprites::drawSelfMasked(dino.x, dino.y, dinoImg, 2);
-    else
-        Sprites::drawSelfMasked(dino.x, dino.y, dinoImg, 0);
+    dino.jumpVel = 0;
+    dino.y = groundHeight - dinoHeight;
 
-    if(dino.jump && !dino.duck)
-        Sprites::drawSelfMasked(dino.x, dino.y, dinoImg, 0);
+    if(arduboy.justPressed(UP_BUTTON))
+        dinoState = DinoState::Jumping;
+    else if(arduboy.pressed(DOWN_BUTTON))
+        dinoState = DinoState::Ducking;
+
+    if( ((game.frame % 8) / 4 != 0))
+        Sprites::drawSelfMasked(dino.x, dino.y, dinoImg, 1);
+    else if( !((game.frame % 8) / 4 != 0))
+        Sprites::drawSelfMasked(dino.x, dino.y, dinoImg, 2);
+}
+
+void dinoJumping()
+{
+    if(dino.y <= dino.maxJump)
+        dinoState = DinoState::Falling;
+    else
+        dino.jumpVel = -2;
+
+    Sprites::drawSelfMasked(dino.x, dino.y, dinoImg, 0);
+    sound.tone(500, 100);
+}
+
+void dinoFalling()
+{
+    if(dino.y >= (groundHeight - dinoHeight))
+        dinoState = DinoState::Running;
+    else
+        dino.jumpVel = 2;
+
+    Sprites::drawSelfMasked(dino.x, dino.y, dinoImg, 0);
+}
+
+void dinoDucking()
+{
+    if(arduboy.justReleased(DOWN_BUTTON))
+        dinoState = DinoState::Running;
+
+    dino.y = groundHeight - dinoDuckHeight;
+
+    if((game.frame % 8) / 4 != 0)
+        Sprites::drawSelfMasked(dino.x, dino.y, dinoDuckImg, 0);
+    else
+        Sprites::drawSelfMasked(dino.x, dino.y, dinoDuckImg, 1);
 }
 
 // Pterodactyl
@@ -230,7 +264,7 @@ void updatePtero()
 
 void drawPtero()
 {
-     if((game.frame % maxFrame) / 2 != 0)
+     if((game.frame % scoreInterval) / 2 != 0)
         Sprites::drawSelfMasked( ptero.x, ptero.y, pteroImg, 0 );
      else
         Sprites::drawSelfMasked( ptero.x, ptero.y, pteroImg, 1);
