@@ -55,7 +55,7 @@ struct Pterodactyl
     float x, y, spd;
     bool spawn;
 };
-Pterodactyl ptero { screen.width, (screen.height - dinoHeight - random(6, 10)) };
+Pterodactyl ptero { screen.width, (screen.height - dinoHeight - random(6, 10)), true };
 
 // Cactus Structure
 struct Object
@@ -63,7 +63,7 @@ struct Object
     float x, y, spd;
 };
 Object cactus { screen.width, 43, 2 };
-Object cloud { screen.width, 43, 1 };
+Object cloud { screen.width + cloudWidth, 10, 1 };
 
 // Game State
 enum class GameState
@@ -80,7 +80,7 @@ void reset()
     arduboy.initRandomSeed();
 
     dino = { 5, (groundHeight - dinoHeight), 0, 10, false, false, false };
-    ptero = { screen.width, (screen.height - dinoHeight - random(6, 10)) };
+    ptero = { screen.width, (screen.height - dinoHeight - random(6, 10)), true };
     cactus = { (screen.width + random(80, 120)), 43, 2 };
     game = { 0, 0 };
 }
@@ -200,7 +200,6 @@ void updateDino()
         dino.jumpVel = -1;
 
     // Collision Detection
-    // if( (dino.y + dinoHeight) > cactus.y && (dino.x + dinoWidth - 4) > cactus.x && (dino.x + dinoWidth - 4) < cactus.x + cactusWidth); gameState = GameState::End;
     if( (dino.y + dinoHeight) > cactus.y && (dino.x + dinoWidth - 4) > cactus.x && (dino.x + dinoWidth - 4) < cactus.x + cactusWidth )
         gameState = GameState::End;
 
@@ -209,26 +208,39 @@ void updateDino()
 
 void drawDino()
 {
-    if( ((game.frame % 8) / 4) && !dino.jump && !dino.duck) Sprites::drawSelfMasked(dino.x, dino.y, dinoImg, 1);
-    else if( !((game.frame % 8) / 4) && !dino.jump && !dino.duck) Sprites::drawSelfMasked(dino.x, dino.y, dinoImg, 2);
-    else Sprites::drawSelfMasked(dino.x, dino.y, dinoImg, 0);
+    if( ((game.frame % 8) / 4) && !dino.jump && !dino.duck)
+        Sprites::drawSelfMasked(dino.x, dino.y, dinoImg, 1);
+    else if( !((game.frame % 8) / 4) && !dino.jump && !dino.duck)
+        Sprites::drawSelfMasked(dino.x, dino.y, dinoImg, 2);
+    else
+        Sprites::drawSelfMasked(dino.x, dino.y, dinoImg, 0);
 
-    if(dino.jump && !dino.duck) Sprites::drawSelfMasked(dino.x, dino.y, dinoImg, 0);
+    if(dino.jump && !dino.duck)
+        Sprites::drawSelfMasked(dino.x, dino.y, dinoImg, 0);
 }
 
 // Pterodactyl
 void updatePtero()
 {
+    if(ptero.x > -pteroWidth)
+        ptero.x -= ptero.spd;
+    else
+        ptero.x = screen.width + random(pteroWidth, 100);
 }
 
 void drawPtero()
 {
+     if((game.frame % maxFrame) / 2 != 0)
+        Sprites::drawSelfMasked( ptero.x, ptero.y, pteroImg, 0 );
+     else
+        Sprites::drawSelfMasked( ptero.x, ptero.y, pteroImg, 1);
 }
 
 // Cactus
 void updateCactus()
 {
-    if(cactus.x > -20) cactus.x -= cactus.spd;
+    if(cactus.x > -20)
+        cactus.x -= cactus.spd;
     else
     {
         cactus.x = screen.width + random(cactusWidth, 100);
@@ -244,6 +256,10 @@ void drawCactus()
 // Cloud
 void updateCloud()
 {
+    if(cloud.x < -cloudWidth)
+        cloud.x = screen.width + random(cloudWidth, 100);
+    else
+        cloud.x -= cloud.spd;
 }
 
 void drawCloud()
