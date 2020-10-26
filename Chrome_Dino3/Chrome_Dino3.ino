@@ -34,15 +34,14 @@ struct Game
 Game game { 0, 0 };
 
 constexpr uint8_t groundHeight = 62;
-constexpr int scoreInterval = 32;
+constexpr uint8_t scoreInterval = 32;
 
 // Dino Structure
 struct Dino
 {
-    float x, y, jumpVel, maxJump;
-    bool jump, fall, duck;
+    int x, y, jumpVel, maxJump, step;
 };
-Dino dino { 5, (screen.height - 2 - dinoHeight), 0, 10, false, false, false };
+Dino dino { 5, (screen.height - 2 - dinoHeight), 0, 10, 8 };
 
 enum class DinoState
 {
@@ -83,9 +82,11 @@ void reset()
 {
     arduboy.initRandomSeed();
 
-    dino = { 5, (groundHeight - dinoHeight), 0, 10, false, false, false };
+    dinoState = DinoState::Running;
+
+    dino = { 5, (groundHeight - dinoHeight), 0, 10, 8 };
     ptero = { screen.width, (screen.height - dinoHeight - random(6, 10)), true };
-    cactus = { (screen.width + random(80, 120)), 43, 2 };
+    cactus = { (screen.width + random(50, screen.width)), 43, 2 };
     game = { 0, 0 };
 }
 
@@ -213,9 +214,9 @@ void dinoRunning()
     else if(arduboy.pressed(DOWN_BUTTON))
         dinoState = DinoState::Ducking;
 
-    if( ((game.frame % 8) / 4 != 0))
+    if( ((game.frame % dino.step) / 4 != 0))
         Sprites::drawSelfMasked(dino.x, dino.y, dinoImg, 1);
-    else if( !((game.frame % 8) / 4 != 0))
+    else if( !((game.frame % dino.step) / 4 != 0))
         Sprites::drawSelfMasked(dino.x, dino.y, dinoImg, 2);
 }
 
@@ -247,7 +248,7 @@ void dinoDucking()
 
     dino.y = groundHeight - dinoDuckHeight;
 
-    if((game.frame % 8) / 4 != 0)
+    if((game.frame % dino.step) / 4 != 0)
         Sprites::drawSelfMasked(dino.x, dino.y, dinoDuckImg, 0);
     else
         Sprites::drawSelfMasked(dino.x, dino.y, dinoDuckImg, 1);
@@ -256,18 +257,22 @@ void dinoDucking()
 // Pterodactyl
 void updatePtero()
 {
+    /*
     if(ptero.x > -pteroWidth)
         ptero.x -= ptero.spd;
     else
         ptero.x = screen.width + random(pteroWidth, 100);
+    */
 }
 
 void drawPtero()
 {
-     if((game.frame % scoreInterval) / 2 != 0)
-        Sprites::drawSelfMasked( ptero.x, ptero.y, pteroImg, 0 );
-     else
-        Sprites::drawSelfMasked( ptero.x, ptero.y, pteroImg, 1);
+    /*
+     if( (game.frame % (scoreInterval / 2)) != 0)
+        Sprites::drawSelfMasked(ptero.x, ptero.y, pteroImg, 0);
+    else
+        Sprites::drawSelfMasked(ptero.x, ptero.y, pteroImg, 2);
+    */
 }
 
 // Cactus
@@ -277,8 +282,7 @@ void updateCactus()
         cactus.x -= cactus.spd;
     else
     {
-        cactus.x = screen.width + random(cactusWidth, 100);
-        Serial.println(cactus.x);
+        cactus.x = screen.width + random(cactusWidth, screen.width);
     }
 }
 
