@@ -179,7 +179,7 @@ void drawGame()
     arduboy.drawLine(0, groundHeight, screen.width, groundHeight);
     
     if(game.score < 100)
-        arduboy.setCursor( ((screen.width / 2) - font.width), 5);
+        arduboy.setCursor( ((screen.width / 2) - font.width * 2), 5);
     else if(game.score < 1000)
         arduboy.setCursor( ((screen.width / 2) - ((font.width * 3) / 2)), 5);
     else if(game.score < 10000)
