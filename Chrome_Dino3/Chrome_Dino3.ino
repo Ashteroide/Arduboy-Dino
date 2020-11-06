@@ -177,15 +177,17 @@ void updateGame()
 void drawGame()
 {
     arduboy.drawLine(0, groundHeight, screen.width, groundHeight);
+
+    arduboy.setCursorY(5);
     
     if(game.score < 100)
-        arduboy.setCursor( ((screen.width / 2) - font.width * 2), 5);
-    else if(game.score < 1000)
-        arduboy.setCursor( ((screen.width / 2) - ((font.width * 3) / 2)), 5);
-    else if(game.score < 10000)
-        arduboy.setCursor( ((screen.width / 2) - (font.width * 2)), 5);
-    else
-        arduboy.setCursor( (screen.width / 2) - (font.width / 2), 5);
+        arduboy.setCursorX( (screen.width - (arduboy.getCharacterWidth(2) + arduboy.getCharacterSpacing(1))) / 2);
+    if(game.score >= 100 && game.score < 1000)
+        arduboy.setCursorX( (screen.width - (arduboy.getCharacterWidth(3) + arduboy.getCharacterSpacing(2))) / 2);
+    if(game.score >= 1000 && game.score < 10000)
+        arduboy.setCursorX( (screen.width - (arduboy.getCharacterWidth(4) + arduboy.getCharacterSpacing(3))) / 2 );
+    if(game.score >= 10000)
+        arduboy.setCursorX( (screen.width - (arduboy.getCharacterWidth(5) + arduboy.getCharacterSpacing(4))) / 2 );
 
     arduboy.print(game.score);
 
@@ -199,7 +201,11 @@ void updateDino()
 {
     // Collision Detection
     if( (dino.y + dinoHeight) > cactus.y && (dino.x + dinoWidth - 4) > cactus.x && (dino.x + dinoWidth - 4) < cactus.x + cactusWidth )
+    {
         gameState = GameState::End;
+
+        sound.tone(500, 100, 250, 200);
+    }
 
     dino.y += dino.jumpVel;
 }
@@ -210,9 +216,16 @@ void dinoRunning()
     dino.y = groundHeight - dinoHeight;
 
     if(arduboy.justPressed(UP_BUTTON))
+    {
         dinoState = DinoState::Jumping;
+        sound.tone(500, 50);
+    }
+
     else if(arduboy.pressed(DOWN_BUTTON))
+    {
         dinoState = DinoState::Ducking;
+        sound.tone(250, 50);
+    }
 
     if( ((game.frame % dino.step) / 4 != 0))
         Sprites::drawSelfMasked(dino.x, dino.y, dinoImg, 1);
@@ -228,7 +241,6 @@ void dinoJumping()
         dino.jumpVel = -2;
 
     Sprites::drawSelfMasked(dino.x, dino.y, dinoImg, 0);
-    sound.tone(500, 100);
 }
 
 void dinoFalling()
@@ -281,9 +293,7 @@ void updateCactus()
     if(cactus.x > -20)
         cactus.x -= cactus.spd;
     else
-    {
         cactus.x = screen.width + random(cactusWidth, screen.width);
-    }
 }
 
 void drawCactus()
@@ -308,22 +318,33 @@ void drawCloud()
 // End
 void updateEnd()
 {
-    if(arduboy.justPressed(A_BUTTON)) gameState = GameState::Menu;
+    if(arduboy.justPressed(A_BUTTON))
+        gameState = GameState::Menu;
 }
 
 void drawEnd()
 {
-    arduboy.setCursor(34, 22);
+    arduboy.drawLine(0, 22, screen.width, 22);
+    Sprites::drawSelfMasked( (screen.width - dinoDuckWidth) / 2, 14, dinoDuckImg, 2 );
+    Sprites::drawSelfMasked( (screen.width / 4) * 3, (23 - cactusHeight), cactusImg, 0 );
+
+    arduboy.setCursor( (screen.width - (arduboy.getCharacterWidth(10) + arduboy.getCharacterSpacing(9))) / 2, 25);
     arduboy.print(F("GAME OVER!"));
 
-    if(game.score < 100) arduboy.setCursor(40, 32);
-    if(game.score >= 100 && game.score < 1000) arduboy.setCursor(37, 32);
-    if(game.score >= 1000 && game.score < 10000) arduboy.setCursor(34, 32);
-    if(game.score >= 10000) arduboy.setCursor(31, 32);
+    arduboy.setCursorY(35);
+
+    if(game.score < 100)
+        arduboy.setCursorX( (screen.width - (arduboy.getCharacterWidth(8) + arduboy.getCharacterSpacing(7))) / 2 );
+    if(game.score >= 100 && game.score < 1000)
+        arduboy.setCursorX( (screen.width - (arduboy.getCharacterWidth(9) + arduboy.getCharacterSpacing(8))) / 2 );
+    if(game.score >= 1000 && game.score < 10000)
+        arduboy.setCursorX( (screen.width - (arduboy.getCharacterWidth(10) + arduboy.getCharacterSpacing(9))) / 2 );
+    if(game.score >= 10000)
+        arduboy.setCursorX( (screen.width - (arduboy.getCharacterWidth(12) + arduboy.getCharacterSpacing(11))) / 2 );
 
     arduboy.print(F("Score:"));
     arduboy.print(game.score);
 
-    arduboy.setCursor(11, 42);
-    arduboy.print(F("Press A to Restart"));
+    arduboy.setCursor( (screen.width - (arduboy.getCharacterWidth(12) + arduboy.getCharacterSpacing(11))) / 2 , 45);
+    arduboy.print(F("A to Restart"));
 }
