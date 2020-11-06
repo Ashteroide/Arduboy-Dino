@@ -138,7 +138,7 @@ void drawMenu()
 {
     Sprites::drawSelfMasked(0, 0, TitleScreenImg, 0);
     
-    arduboy.setCursor(34, 30);
+    arduboy.setCursor( textToMiddle(10), 30);
     arduboy.println(F("A to Start"));
 }
 
@@ -174,6 +174,11 @@ void updateGame()
         ++game.score;
 }
 
+int textToMiddle(int charWidth)
+{
+    return (screen.width - (arduboy.getCharacterWidth(charWidth) + arduboy.getCharacterSpacing(charWidth - 1))) / 2;
+}
+
 void drawGame()
 {
     arduboy.drawLine(0, groundHeight, screen.width, groundHeight);
@@ -181,13 +186,13 @@ void drawGame()
     arduboy.setCursorY(5);
     
     if(game.score < 100)
-        arduboy.setCursorX( (screen.width - (arduboy.getCharacterWidth(2) + arduboy.getCharacterSpacing(1))) / 2);
+        arduboy.setCursorX( textToMiddle(2) );
     if(game.score >= 100 && game.score < 1000)
-        arduboy.setCursorX( (screen.width - (arduboy.getCharacterWidth(3) + arduboy.getCharacterSpacing(2))) / 2);
+        arduboy.setCursorX( textToMiddle(3) );
     if(game.score >= 1000 && game.score < 10000)
-        arduboy.setCursorX( (screen.width - (arduboy.getCharacterWidth(4) + arduboy.getCharacterSpacing(3))) / 2 );
+        arduboy.setCursorX( textToMiddle(4) );
     if(game.score >= 10000)
-        arduboy.setCursorX( (screen.width - (arduboy.getCharacterWidth(5) + arduboy.getCharacterSpacing(4))) / 2 );
+        arduboy.setCursorX( textToMiddle(5) );
 
     arduboy.print(game.score);
 
@@ -326,21 +331,21 @@ void drawEnd()
 {
     arduboy.drawLine(0, 22, screen.width, 22);
     Sprites::drawSelfMasked( (screen.width - dinoDuckWidth) / 2, 14, dinoDuckImg, 2 );
-    Sprites::drawSelfMasked( (screen.width / 4) * 3, (23 - cactusHeight), cactusImg, 0 );
+    Sprites::drawSelfMasked( 20, (23 - cactusHeight), cactusImg, 0 );
 
-    arduboy.setCursor( (screen.width - (arduboy.getCharacterWidth(10) + arduboy.getCharacterSpacing(9))) / 2, 25);
+    arduboy.setCursor( textToMiddle(10), 25);
     arduboy.print(F("GAME OVER!"));
 
     arduboy.setCursorY(35);
 
     if(game.score < 100)
-        arduboy.setCursorX( (screen.width - (arduboy.getCharacterWidth(8) + arduboy.getCharacterSpacing(7))) / 2 );
+        arduboy.setCursorX( textToMiddle(8) );
     if(game.score >= 100 && game.score < 1000)
-        arduboy.setCursorX( (screen.width - (arduboy.getCharacterWidth(9) + arduboy.getCharacterSpacing(8))) / 2 );
+        arduboy.setCursorX( textToMiddle(9) );
     if(game.score >= 1000 && game.score < 10000)
-        arduboy.setCursorX( (screen.width - (arduboy.getCharacterWidth(10) + arduboy.getCharacterSpacing(9))) / 2 );
+        arduboy.setCursorX( textToMiddle(10) );
     if(game.score >= 10000)
-        arduboy.setCursorX( (screen.width - (arduboy.getCharacterWidth(12) + arduboy.getCharacterSpacing(11))) / 2 );
+        arduboy.setCursorX( textToMiddle(11) );
 
     arduboy.print(F("Score:"));
     arduboy.print(game.score);
