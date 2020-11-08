@@ -41,7 +41,7 @@ constexpr uint8_t scoreInterval = 32;
 struct Dino
 {
     int x, y, jumpVel, maxJump, step;
-    bool AIMode;
+    bool autoJump;
 };
 Dino dino { 5, (screen.height - 2 - dinoHeight), 0, 10, 8, false};
 
@@ -95,7 +95,7 @@ void reset()
 
     dinoState = DinoState::Running;
 
-    dino = { 5, (groundHeight - dinoHeight), 0, 10, 8, dino.AIMode };
+    dino = { 5, (groundHeight - dinoHeight), 0, 10, 8, dino.autoJump };
     ptero = { screen.width, (screen.height - dinoHeight - random(6, 10)), true };
     cactus = { (screen.width + random(50, screen.width)), 43, 2 };
     game = { 0, 0, game.soundMode };
@@ -150,7 +150,7 @@ void updateMenu()
             break;
 
         case MenuCursor::AI:
-            updateAI();
+            updateAutoJump();
             break;
 
         case MenuCursor::Sound:
@@ -168,15 +168,15 @@ void drawMenu()
 
     arduboy.setCursorY(38);
 
-    if(dino.AIMode)
+    if(dino.autoJump)
     {
-        arduboy.setCursorX(textToMiddle(5));
-        arduboy.print(F("AI:On"));
+        arduboy.setCursorX(textToMiddle(11));
+        arduboy.print(F("AutoJump:On"));
     }
     else
     {
-        arduboy.setCursorX(textToMiddle(6));
-        arduboy.print(F("AI:Off"));
+        arduboy.setCursorX(textToMiddle(12));
+        arduboy.print(F("AutoJump:Off"));
     }
 
     arduboy.setCursorY(46);
@@ -203,14 +203,14 @@ void updateStart()
     arduboy.print(F("A>"));
 }
 
-void updateAI()
+void updateAutoJump()
 {
     if(arduboy.justPressed(A_BUTTON))
     {
-        if(dino.AIMode)
-            dino.AIMode = false;
-        else if(!dino.AIMode)
-            dino.AIMode = true;
+        if(dino.autoJump)
+            dino.autoJump = false;
+        else if(!dino.autoJump)
+            dino.autoJump = true;
     }
 
     if(arduboy.justPressed(UP_BUTTON))
@@ -218,7 +218,7 @@ void updateAI()
     else if(arduboy.justPressed(DOWN_BUTTON))
         menuCursor = MenuCursor::Sound;
 
-    arduboy.setCursor( (textToMiddle(2) / 2), 38);
+    arduboy.setCursor( (textToMiddle(11) / 2), 38);
     arduboy.print(F("A>"));
 }
 
@@ -241,6 +241,52 @@ void updateSound()
 
 void updateGame()
 {
+    updateDino();
+    updatePtero();
+    updateCactus();
+    updateCloud();
+
+    ++game.frame;
+
+    if((game.frame % scoreInterval) != 0)
+        ++game.score;
+}
+
+int textToMiddle(int charWidth)
+{
+    return (screen.width - (arduboy.getCharacterWidth(charWidth) + arduboy.getCharacterSpacing(charWidth - 1))) / 2;
+}
+
+void setCursorForScore(uint8_t x, uint8_t y)
+{
+    arduboy.setCursorY(y);
+
+    if(game.score < 100)
+        arduboy.setCursorX(textToMiddle(x + 0));
+    else if(game.score < 1000)
+        arduboy.setCursorX(textToMiddle(x + 1));
+    else if(game.score < 10000)
+        arduboy.setCursorX(textToMiddle(x + 2));
+    else
+        arduboy.setCursorX(textToMiddle(x + 3));
+}
+
+void drawGame()
+{
+    arduboy.drawLine(0, groundHeight, screen.width, groundHeight);
+
+    setCursorForScore(2, 5);
+
+    arduboy.print(game.score);
+
+    drawPtero();
+    drawCactus();
+    drawCloud();
+}
+
+// Dino
+void updateDino()
+{
     switch(dinoState)
     {
         case DinoState::Running:
@@ -260,52 +306,6 @@ void updateGame()
             break;
     }
 
-    updateDino();
-    updatePtero();
-    updateCactus();
-    updateCloud();
-
-    ++game.frame;
-
-    if((game.frame % scoreInterval) != 0)
-        ++game.score;
-}
-
-int textToMiddle(int charWidth)
-{
-    return (screen.width - (arduboy.getCharacterWidth(charWidth) + arduboy.getCharacterSpacing(charWidth - 1))) / 2;
-}
-
-void drawScore(uint8_t x, uint8_t y)
-{
-    arduboy.setCursorY(y);
-
-    if(game.score < 100)
-        arduboy.setCursorX(textToMiddle(x + 0));
-    else if(game.score < 1000)
-        arduboy.setCursorX(textToMiddle(x + 1));
-    else if(game.score < 10000)
-        arduboy.setCursorX(textToMiddle(x + 2));
-    else if(game.score >= 10000)
-        arduboy.setCursorX(textToMiddle(x + 3));
-}
-
-void drawGame()
-{
-    arduboy.drawLine(0, groundHeight, screen.width, groundHeight);
-
-    drawScore(2, 5);
-
-    arduboy.print(game.score);
-
-    drawPtero();
-    drawCactus();
-    drawCloud();
-}
-
-// Dino
-void updateDino()
-{
     // Collision Detection
     if( (dino.y + dinoHeight) > cactus.y && (dino.x + dinoWidth - 4) > cactus.x && (dino.x + dinoWidth - 4) < cactus.x + cactusWidth )
     {
@@ -323,7 +323,7 @@ void dinoRunning()
     dino.jumpVel = 0;
     dino.y = groundHeight - dinoHeight;
 
-    if(dino.AIMode)
+    if(dino.autoJump)
     {
         if(cactus.x - (dino.x + cactusWidth) < (cactus.spd * cactusHeight) && (cactus.x - dino.x) > 5)
             dinoState = DinoState::Jumping;
@@ -456,7 +456,7 @@ void drawEnd()
     arduboy.setCursor( textToMiddle(10), 25);
     arduboy.print(F("GAME OVER!"));
 
-    drawScore(8, 35);
+    setCursorForScore(8, 35);
 
     arduboy.print(F("Score:"));
     arduboy.print(game.score);
