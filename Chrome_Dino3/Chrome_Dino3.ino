@@ -78,6 +78,14 @@ enum class GameState
 };
 GameState gameState = GameState::Menu;
 
+// Menu Cusor
+enum class MenuCursor
+{
+    Start,
+    AI
+};
+MenuCursor menuCursor = MenuCursor::Start;
+
 // Reset
 void reset()
 {
@@ -85,7 +93,7 @@ void reset()
 
     dinoState = DinoState::Running;
 
-    dino = { 5, (groundHeight - dinoHeight), 0, 10, 8, true};
+    dino = { 5, (groundHeight - dinoHeight), 0, 10, 8, false};
     ptero = { screen.width, (screen.height - dinoHeight - random(6, 10)), true };
     cactus = { (screen.width + random(50, screen.width)), 43, 2 };
     game = { 0, 0 };
@@ -128,19 +136,66 @@ void loop()
 // Menu
 void updateMenu()
 {
-    if(arduboy.justPressed(A_BUTTON))
+    if(arduboy.justPressed(DOWN_BUTTON) && menuCursor != MenuCursor::AI)
+        menuCursor = MenuCursor::AI;
+    else if(arduboy.justPressed(UP_BUTTON) && menuCursor != MenuCursor::Start)
+        menuCursor = MenuCursor::Start;
+
+    if(arduboy.justPressed(A_BUTTON) && menuCursor == MenuCursor::Start)
     {
-        reset();
         gameState = GameState::Game;
+    }
+    else if(arduboy.justPressed(A_BUTTON) && menuCursor == MenuCursor::AI)
+    {
+        if(dino.AIMode)
+            dino.AIMode = false;
+        else if(!dino.AIMode)
+            dino.AIMode = true;
+    }
+
+    switch(menuCursor)
+    {
+        case MenuCursor::Start:
+            updateStart();
+            break;
+
+        case MenuCursor::AI:
+            updateAI();
+            break;
     }
 }
 
 void drawMenu()
 {
     Sprites::drawSelfMasked(0, 0, TitleScreenImg, 0);
-    
-    arduboy.setCursor( textToMiddle(10), 30);
-    arduboy.println(F("A to Start"));
+
+    arduboy.setCursor(textToMiddle(10), 30);
+    arduboy.print(F("Start Game"));
+
+    arduboy.setCursorY(38);
+
+    if(dino.AIMode)
+    {
+        arduboy.setCursorX(textToMiddle(5));
+        arduboy.print(F("AI:On"));
+    }
+    else
+    {
+        arduboy.setCursorX(textToMiddle(6));
+        arduboy.print(F("AI:Off"));
+    }
+}
+
+void updateStart()
+{
+    arduboy.setCursor( (textToMiddle(8) / 2), 30);
+    arduboy.print(F("A>"));
+}
+
+void updateAI()
+{
+    arduboy.setCursor( (textToMiddle(2) / 2), 38);
+    arduboy.print(F("A>"));
 }
 
 void updateGame()
@@ -228,7 +283,7 @@ void dinoRunning()
 
     if(dino.AIMode)
     {
-        if((cactus.x - dino.x) < 40 && (cactus.x - dino.x) > 20)
+        if(cactus.x - (dino.x + cactusWidth) < (cactus.spd * cactusHeight) && (cactus.x - dino.x) > 20)
             dinoState = DinoState::Jumping;
     }
 
@@ -310,7 +365,11 @@ void updateCactus()
     if(cactus.x > -20)
         cactus.x -= cactus.spd;
     else
+    {
         cactus.x = screen.width + random(cactusWidth, screen.width);
+        cactus.spd += 0.02;
+    }
+
 }
 
 void drawCactus()
@@ -336,7 +395,10 @@ void drawCloud()
 void updateEnd()
 {
     if(arduboy.justPressed(A_BUTTON))
+    {
         gameState = GameState::Menu;
+        reset();
+    }
 }
 
 void drawEnd()
