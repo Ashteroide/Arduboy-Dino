@@ -30,8 +30,9 @@ Dimensions font { 6, 8 };
 struct Game
 {
     int score, frame;
+    bool soundMode;
 };
-Game game { 0, 0 };
+Game game { 0, 0, true };
 
 constexpr uint8_t groundHeight = 62;
 constexpr uint8_t scoreInterval = 32;
@@ -82,7 +83,8 @@ GameState gameState = GameState::Menu;
 enum class MenuCursor
 {
     Start,
-    AI
+    AI,
+    Sound
 };
 MenuCursor menuCursor = MenuCursor::Start;
 
@@ -93,10 +95,10 @@ void reset()
 
     dinoState = DinoState::Running;
 
-    dino = { 5, (groundHeight - dinoHeight), 0, 10, 8, false};
+    dino = { 5, (groundHeight - dinoHeight), 0, 10, 8, dino.AIMode };
     ptero = { screen.width, (screen.height - dinoHeight - random(6, 10)), true };
     cactus = { (screen.width + random(50, screen.width)), 43, 2 };
-    game = { 0, 0 };
+    game = { 0, 0, game.soundMode };
 }
 
 void setup()
@@ -136,21 +138,9 @@ void loop()
 // Menu
 void updateMenu()
 {
-    if(arduboy.justPressed(DOWN_BUTTON) && menuCursor != MenuCursor::AI)
-        menuCursor = MenuCursor::AI;
-    else if(arduboy.justPressed(UP_BUTTON) && menuCursor != MenuCursor::Start)
-        menuCursor = MenuCursor::Start;
-
     if(arduboy.justPressed(A_BUTTON) && menuCursor == MenuCursor::Start)
     {
         gameState = GameState::Game;
-    }
-    else if(arduboy.justPressed(A_BUTTON) && menuCursor == MenuCursor::AI)
-    {
-        if(dino.AIMode)
-            dino.AIMode = false;
-        else if(!dino.AIMode)
-            dino.AIMode = true;
     }
 
     switch(menuCursor)
@@ -161,6 +151,10 @@ void updateMenu()
 
         case MenuCursor::AI:
             updateAI();
+            break;
+
+        case MenuCursor::Sound:
+            updateSound();
             break;
     }
 }
@@ -184,17 +178,64 @@ void drawMenu()
         arduboy.setCursorX(textToMiddle(6));
         arduboy.print(F("AI:Off"));
     }
+
+    arduboy.setCursorY(46);
+
+    if(game.soundMode)
+    {
+        arduboy.setCursorX(textToMiddle(8));
+        arduboy.print(F("Sound:On"));
+    }
+    else
+    {
+        arduboy.setCursorX(textToMiddle(9));
+        arduboy.print(F("Sound:Off"));
+    }
+    
 }
 
 void updateStart()
 {
+    if(arduboy.justPressed(DOWN_BUTTON) && menuCursor != MenuCursor::AI)
+        menuCursor = MenuCursor::AI;
+
     arduboy.setCursor( (textToMiddle(8) / 2), 30);
     arduboy.print(F("A>"));
 }
 
 void updateAI()
 {
+    if(arduboy.justPressed(A_BUTTON))
+    {
+        if(dino.AIMode)
+            dino.AIMode = false;
+        else if(!dino.AIMode)
+            dino.AIMode = true;
+    }
+
+    if(arduboy.justPressed(UP_BUTTON))
+        menuCursor = MenuCursor::Start;
+    else if(arduboy.justPressed(DOWN_BUTTON))
+        menuCursor = MenuCursor::Sound;
+
     arduboy.setCursor( (textToMiddle(2) / 2), 38);
+    arduboy.print(F("A>"));
+}
+
+void updateSound()
+{
+    if(arduboy.justPressed(A_BUTTON))
+    {
+        if(game.soundMode)
+            game.soundMode = false;
+        else if(!game.soundMode)
+            game.soundMode = true;
+    }
+
+    if(arduboy.justPressed(UP_BUTTON))
+        menuCursor = MenuCursor::AI;
+
+    arduboy.setCursor( (textToMiddle(4) / 2), 46);
     arduboy.print(F("A>"));
 }
 
@@ -270,7 +311,8 @@ void updateDino()
     {
         gameState = GameState::End;
 
-        sound.tone(500, 100, 250, 200);
+        if(game.soundMode)
+            sound.tone(500, 100, 250, 200);
     }
 
     dino.y += dino.jumpVel;
@@ -283,20 +325,24 @@ void dinoRunning()
 
     if(dino.AIMode)
     {
-        if(cactus.x - (dino.x + cactusWidth) < (cactus.spd * cactusHeight) && (cactus.x - dino.x) > 20)
+        if(cactus.x - (dino.x + cactusWidth) < (cactus.spd * cactusHeight) && (cactus.x - dino.x) > 5)
             dinoState = DinoState::Jumping;
     }
 
     if(arduboy.justPressed(UP_BUTTON))
     {
         dinoState = DinoState::Jumping;
-        sound.tone(500, 50);
+
+        if(game.soundMode)
+            sound.tone(500, 50);
     }
 
     else if(arduboy.pressed(DOWN_BUTTON))
     {
         dinoState = DinoState::Ducking;
-        sound.tone(250, 50);
+
+        if(game.soundMode)
+            sound.tone(250, 50);
     }
 
     if( ((game.frame % dino.step) / 4 != 0))
