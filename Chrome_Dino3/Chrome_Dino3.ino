@@ -40,8 +40,9 @@ constexpr uint8_t scoreInterval = 32;
 struct Dino
 {
     int x, y, jumpVel, maxJump, step;
+    bool AIMode;
 };
-Dino dino { 5, (screen.height - 2 - dinoHeight), 0, 10, 8 };
+Dino dino { 5, (screen.height - 2 - dinoHeight), 0, 10, 8, false};
 
 enum class DinoState
 {
@@ -84,7 +85,7 @@ void reset()
 
     dinoState = DinoState::Running;
 
-    dino = { 5, (groundHeight - dinoHeight), 0, 10, 8 };
+    dino = { 5, (groundHeight - dinoHeight), 0, 10, 8, true};
     ptero = { screen.width, (screen.height - dinoHeight - random(6, 10)), true };
     cactus = { (screen.width + random(50, screen.width)), 43, 2 };
     game = { 0, 0 };
@@ -179,20 +180,25 @@ int textToMiddle(int charWidth)
     return (screen.width - (arduboy.getCharacterWidth(charWidth) + arduboy.getCharacterSpacing(charWidth - 1))) / 2;
 }
 
+void drawScore(uint8_t x, uint8_t y)
+{
+    arduboy.setCursorY(y);
+
+    if(game.score < 100)
+        arduboy.setCursorX(textToMiddle(x + 0));
+    else if(game.score < 1000)
+        arduboy.setCursorX(textToMiddle(x + 1));
+    else if(game.score < 10000)
+        arduboy.setCursorX(textToMiddle(x + 2));
+    else if(game.score >= 10000)
+        arduboy.setCursorX(textToMiddle(x + 3));
+}
+
 void drawGame()
 {
     arduboy.drawLine(0, groundHeight, screen.width, groundHeight);
 
-    arduboy.setCursorY(5);
-    
-    if(game.score < 100)
-        arduboy.setCursorX( textToMiddle(2) );
-    if(game.score >= 100 && game.score < 1000)
-        arduboy.setCursorX( textToMiddle(3) );
-    if(game.score >= 1000 && game.score < 10000)
-        arduboy.setCursorX( textToMiddle(4) );
-    if(game.score >= 10000)
-        arduboy.setCursorX( textToMiddle(5) );
+    drawScore(2, 5);
 
     arduboy.print(game.score);
 
@@ -219,6 +225,12 @@ void dinoRunning()
 {
     dino.jumpVel = 0;
     dino.y = groundHeight - dinoHeight;
+
+    if(dino.AIMode)
+    {
+        if((cactus.x - dino.x) < 40 && (cactus.x - dino.x) > 20)
+            dinoState = DinoState::Jumping;
+    }
 
     if(arduboy.justPressed(UP_BUTTON))
     {
@@ -336,16 +348,7 @@ void drawEnd()
     arduboy.setCursor( textToMiddle(10), 25);
     arduboy.print(F("GAME OVER!"));
 
-    arduboy.setCursorY(35);
-
-    if(game.score < 100)
-        arduboy.setCursorX( textToMiddle(8) );
-    if(game.score >= 100 && game.score < 1000)
-        arduboy.setCursorX( textToMiddle(9) );
-    if(game.score >= 1000 && game.score < 10000)
-        arduboy.setCursorX( textToMiddle(10) );
-    if(game.score >= 10000)
-        arduboy.setCursorX( textToMiddle(11) );
+    drawScore(8, 35);
 
     arduboy.print(F("Score:"));
     arduboy.print(game.score);
