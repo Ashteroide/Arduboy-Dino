@@ -21,10 +21,10 @@ ArduboyTones sound(arduboy.audio.enabled);
 // Screen Structure
 struct Dimensions
 {
-    int width, height;
+    static constexpr uint8_t width = Arduboy2::width();
+    static constexpr uint8_t height = Arduboy2::height();
 };
-Dimensions screen { Arduboy2::width(), Arduboy2::height() };
-Dimensions font { 6, 8 };
+Dimensions screen;
 
 // Game Structure
 struct Game
@@ -40,10 +40,11 @@ constexpr uint8_t scoreInterval = 32;
 // Dino Structure
 struct Dino
 {
-    int x, y, jumpVel, maxJump, step;
+    static constexpr uint8_t step = 10;
+    int x, y, jumpVel, maxJump;
     bool autoJump;
 };
-Dino dino { 5, (screen.height - 2 - dinoHeight), 0, 10, 8, false};
+Dino dino { 5, (screen.height - 2 - dinoHeight), 0, 8, false };
 
 enum class DinoState
 {
@@ -54,21 +55,15 @@ enum class DinoState
 };
 DinoState dinoState = DinoState::Running; 
 
-// Pterodactyl Structure
-struct Pterodactyl
-{
-    float x, y, spd;
-    bool spawn;
-};
-Pterodactyl ptero { screen.width, (screen.height - dinoHeight - random(6, 10)), true };
-
 // Cactus Structure
 struct Object
 {
-    float x, y, spd;
+    float x, y, spd, accel;
 };
-Object cactus { screen.width, 43, 2 };
-Object cloud { screen.width + cloudWidth, 10, 1 };
+Object ptero { screen.width, (screen.height - dinoHeight - random(6, 10)), 2, 0 };
+Object cactus { screen.width, 43, 2, 0.02 };
+
+Object cloud { screen.width + cloudWidth, 10, 1, 0 };
 
 // Game State
 enum class GameState
@@ -95,9 +90,9 @@ void reset()
 
     dinoState = DinoState::Running;
 
-    dino = { 5, (groundHeight - dinoHeight), 0, 10, 8, dino.autoJump };
-    ptero = { screen.width, (screen.height - dinoHeight - random(6, 10)), true };
-    cactus = { (screen.width + random(50, screen.width)), 43, 2 };
+    dino = { 5, (groundHeight - dinoHeight), 0, 8, dino.autoJump };
+    ptero = { screen.width, (screen.height - dinoHeight - random(6, 10)), 2, 0.02 };
+    cactus = { (screen.width + random(50, screen.width)), 43, 2, 0.02 };
     game = { 0, 0, game.soundMode };
 }
 
@@ -109,7 +104,9 @@ void setup()
 
 void loop()
 {
-    if(!arduboy.nextFrame()) return;
+    if(!arduboy.nextFrame())
+        return;
+    
     arduboy.pollButtons();
 
     arduboy.clear();
@@ -141,6 +138,7 @@ void updateMenu()
     if(arduboy.justPressed(A_BUTTON) && menuCursor == MenuCursor::Start)
     {
         gameState = GameState::Game;
+        reset();
     }
 
     switch(menuCursor)
@@ -209,7 +207,7 @@ void updateAutoJump()
     {
         if(dino.autoJump)
             dino.autoJump = false;
-        else if(!dino.autoJump)
+        else
             dino.autoJump = true;
     }
 
@@ -228,7 +226,7 @@ void updateSound()
     {
         if(game.soundMode)
             game.soundMode = false;
-        else if(!game.soundMode)
+        else
             game.soundMode = true;
     }
 
@@ -306,6 +304,7 @@ void updateDino()
             break;
     }
 
+    
     // Collision Detection
     if( (dino.y + dinoHeight) > cactus.y && (dino.x + dinoWidth - 4) > cactus.x && (dino.x + dinoWidth - 4) < cactus.x + cactusWidth )
     {
@@ -347,7 +346,7 @@ void dinoRunning()
 
     if( ((game.frame % dino.step) / 4 != 0))
         Sprites::drawSelfMasked(dino.x, dino.y, dinoImg, 1);
-    else if( !((game.frame % dino.step) / 4 != 0))
+    else
         Sprites::drawSelfMasked(dino.x, dino.y, dinoImg, 2);
 }
 
@@ -413,7 +412,8 @@ void updateCactus()
     else
     {
         cactus.x = screen.width + random(cactusWidth, screen.width);
-        cactus.spd += 0.02;
+        cactus.spd += cactus.accel;
+        
     }
 
 }
@@ -441,10 +441,7 @@ void drawCloud()
 void updateEnd()
 {
     if(arduboy.justPressed(A_BUTTON))
-    {
         gameState = GameState::Menu;
-        reset();
-    }
 }
 
 void drawEnd()
