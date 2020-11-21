@@ -3,8 +3,8 @@
 Chrome_Dino3/build/
 
 # Files
-Chrome_Dino3/compile.command
-Chrome_Dino3/upload.command
+compile.command
+upload.command
 Chrome_Dino3/.DS_Store
 .DS_Store
 .gitignore

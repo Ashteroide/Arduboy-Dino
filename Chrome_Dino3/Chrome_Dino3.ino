@@ -24,15 +24,15 @@ struct Dimensions
     static constexpr uint8_t width = Arduboy2::width();
     static constexpr uint8_t height = Arduboy2::height();
 };
-Dimensions screen;
+Dimensions;
 
 // Game Structure
 struct Game
 {
-    int score, frame;
+    int score, frame, highScore;
     bool soundMode;
 };
-Game game { 0, 0, true };
+Game game { 0, 0, game.highScore, true };
 
 constexpr uint8_t groundHeight = 62;
 constexpr uint8_t scoreInterval = 32;
@@ -44,7 +44,7 @@ struct Dino
     int x, y, jumpVel, maxJump;
     bool autoJump;
 };
-Dino dino { 5, (screen.height - 2 - dinoHeight), 0, 8, false };
+Dino dino { 5, (Dimensions::height - 2 - dinoHeight), 0, 8, false };
 
 enum class DinoState
 {
@@ -60,10 +60,12 @@ struct Object
 {
     float x, y, spd, accel;
 };
-Object ptero { screen.width, (screen.height - dinoHeight - random(6, 10)), 2, 0 };
-Object cactus { screen.width, 43, 2, 0.02 };
+Object ptero { Dimensions::width, (Dimensions::height - dinoHeight - random(6, 10)), 2, 0 };
+bool pteroSpawn;
 
-Object cloud { screen.width + cloudWidth, 10, 1, 0 };
+Object cactus { Dimensions::width, 43, 2, 0.02 };
+
+Object cloud { Dimensions::width + cloudWidth, 10, 1, 0 };
 
 // Game State
 enum class GameState
@@ -91,8 +93,9 @@ void reset()
     dinoState = DinoState::Running;
 
     dino = { 5, (groundHeight - dinoHeight), 0, 8, dino.autoJump };
-    ptero = { screen.width, (screen.height - dinoHeight - random(6, 10)), 2, 0.02 };
-    cactus = { (screen.width + random(50, screen.width)), 43, 2, 0.02 };
+    ptero = { Dimensions::width, (Dimensions::height - dinoHeight - random(6, 10)), 2, 0.02 };
+    pteroSpawn = true;
+    cactus = { (Dimensions::width + random(50, Dimensions::width)), 43, 2, 0.02 };
     game = { 0, 0, game.soundMode };
 }
 
@@ -204,12 +207,7 @@ void updateStart()
 void updateAutoJump()
 {
     if(arduboy.justPressed(A_BUTTON))
-    {
-        if(dino.autoJump)
-            dino.autoJump = false;
-        else
-            dino.autoJump = true;
-    }
+        dino.autoJump = !dino.autoJump;
 
     if(arduboy.justPressed(UP_BUTTON))
         menuCursor = MenuCursor::Start;
@@ -223,12 +221,7 @@ void updateAutoJump()
 void updateSound()
 {
     if(arduboy.justPressed(A_BUTTON))
-    {
-        if(game.soundMode)
-            game.soundMode = false;
-        else
-            game.soundMode = true;
-    }
+        game.soundMode = !game.soundMode;
 
     if(arduboy.justPressed(UP_BUTTON))
         menuCursor = MenuCursor::AI;
@@ -252,7 +245,7 @@ void updateGame()
 
 int textToMiddle(int charWidth)
 {
-    return (screen.width - (arduboy.getCharacterWidth(charWidth) + arduboy.getCharacterSpacing(charWidth - 1))) / 2;
+    return (Dimensions::width - (arduboy.getCharacterWidth(charWidth) + arduboy.getCharacterSpacing(charWidth - 1))) / 2;
 }
 
 void setCursorForScore(uint8_t x, uint8_t y)
@@ -271,7 +264,7 @@ void setCursorForScore(uint8_t x, uint8_t y)
 
 void drawGame()
 {
-    arduboy.drawLine(0, groundHeight, screen.width, groundHeight);
+    arduboy.drawLine(0, groundHeight, Dimensions::width, groundHeight);
 
     setCursorForScore(2, 5);
 
@@ -386,22 +379,21 @@ void dinoDucking()
 // Pterodactyl
 void updatePtero()
 {
-    /*
-    if(ptero.x > -pteroWidth)
+    if(ptero.x > -pteroWidth && pteroSpawn)
         ptero.x -= ptero.spd;
-    else
-        ptero.x = screen.width + random(pteroWidth, 100);
-    */
+    else if(pteroSpawn)
+    {
+        ptero.x = Dimensions::width + random(pteroWidth, 100);
+        pteroSpawn = !pteroSpawn;
+    }
 }
 
 void drawPtero()
 {
-    /*
      if( (game.frame % (scoreInterval / 2)) != 0)
         Sprites::drawSelfMasked(ptero.x, ptero.y, pteroImg, 0);
     else
         Sprites::drawSelfMasked(ptero.x, ptero.y, pteroImg, 2);
-    */
 }
 
 // Cactus
@@ -411,9 +403,9 @@ void updateCactus()
         cactus.x -= cactus.spd;
     else
     {
-        cactus.x = screen.width + random(cactusWidth, screen.width);
+        cactus.x = Dimensions::width + random(cactusWidth, Dimensions::width);
         cactus.spd += cactus.accel;
-        
+        pteroSpawn = true;
     }
 
 }
@@ -427,7 +419,7 @@ void drawCactus()
 void updateCloud()
 {
     if(cloud.x < -cloudWidth)
-        cloud.x = screen.width + random(cloudWidth, 100);
+        cloud.x = Dimensions::width + random(cloudWidth, 100);
     else
         cloud.x -= cloud.spd;
 }
@@ -446,8 +438,8 @@ void updateEnd()
 
 void drawEnd()
 {
-    arduboy.drawLine(0, 22, screen.width, 22);
-    Sprites::drawSelfMasked( (screen.width - dinoDuckWidth) / 2, 14, dinoDuckImg, 2 );
+    arduboy.drawLine(0, 22, Dimensions::width, 22);
+    Sprites::drawSelfMasked( (Dimensions::width - dinoDuckWidth) / 2, 14, dinoDuckImg, 2 );
     Sprites::drawSelfMasked( 20, (23 - cactusHeight), cactusImg, 0 );
 
     arduboy.setCursor( textToMiddle(10), 25);
@@ -458,6 +450,6 @@ void drawEnd()
     arduboy.print(F("Score:"));
     arduboy.print(game.score);
 
-    arduboy.setCursor( (screen.width - (arduboy.getCharacterWidth(12) + arduboy.getCharacterSpacing(11))) / 2 , 45);
+    arduboy.setCursor( (Dimensions::width - (arduboy.getCharacterWidth(12) + arduboy.getCharacterSpacing(11))) / 2 , 45);
     arduboy.print(F("A to Restart"));
 }
