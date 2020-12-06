@@ -32,7 +32,7 @@ struct Game
     int score, frame, highScore;
     bool soundMode;
 };
-Game game { 0, 0, game.highScore, true };
+Game game { 0, 0, game.highScore, false };
 
 constexpr uint8_t groundHeight = 62;
 constexpr uint8_t scoreInterval = 32;
@@ -96,7 +96,7 @@ void reset()
     ptero = { Dimensions::width, (Dimensions::height - dinoHeight - random(6, 10)), 2, 0.02 };
     pteroSpawn = true;
     cactus = { (Dimensions::width + random(50, Dimensions::width)), 43, 2, 0.02 };
-    game = { 0, 0, game.soundMode };
+    game = { 0, 0, game.highScore, game.soundMode };
 }
 
 void setup()
