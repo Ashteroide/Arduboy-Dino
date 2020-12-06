@@ -379,6 +379,7 @@ void dinoDucking()
 // Pterodactyl
 void updatePtero()
 {
+    /*
     if(ptero.x > -pteroWidth && pteroSpawn)
         ptero.x -= ptero.spd;
     else if(pteroSpawn)
@@ -386,14 +387,18 @@ void updatePtero()
         ptero.x = Dimensions::width + random(pteroWidth, 100);
         pteroSpawn = !pteroSpawn;
     }
+    */
 }
 
 void drawPtero()
 {
+    /*
      if( (game.frame % (scoreInterval / 2)) != 0)
         Sprites::drawSelfMasked(ptero.x, ptero.y, pteroImg, 0);
     else
         Sprites::drawSelfMasked(ptero.x, ptero.y, pteroImg, 2);
+
+    */
 }
 
 // Cactus
