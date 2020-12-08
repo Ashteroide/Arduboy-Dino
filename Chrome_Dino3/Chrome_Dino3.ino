@@ -517,6 +517,8 @@ void drawEnd()
     arduboy.display();
 }
 
+
+// Highscore Menu
 void updateHighScores()
 {
     if(arduboy.justPressed(B_BUTTON))
