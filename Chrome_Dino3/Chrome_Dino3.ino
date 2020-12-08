@@ -29,13 +29,22 @@ Dimensions;
 // Game Structure
 struct Game
 {
-    int score, frame, highScore;
+    int score, frame;
     bool soundMode;
 };
-Game game { 0, 0, game.highScore, false };
+Game game { 0, 0, false };
 
 constexpr uint8_t groundHeight = 62;
 constexpr uint8_t scoreInterval = 32;
+
+// High Score Structure
+struct SaveData
+{
+    uint16_t highscores[3];
+};
+SaveData saveData;
+
+constexpr uint16_t saveDataLocation = 272;
 
 // Dino Structure
 struct Dino
@@ -72,7 +81,8 @@ enum class GameState
 {
     Menu,
     Game,
-    End
+    End,
+    HighScore
 };
 GameState gameState = GameState::Menu;
 
@@ -96,13 +106,36 @@ void reset()
     ptero = { Dimensions::width, (Dimensions::height - dinoHeight - random(6, 10)), 2, 0.02 };
     pteroSpawn = true;
     cactus = { (Dimensions::width + random(50, Dimensions::width)), 43, 2, 0.02 };
-    game = { 0, 0, game.highScore, game.soundMode };
+    game = { 0, 0, game.soundMode };
+
+    loadSaveData();
+}
+
+void saveSaveData()
+{
+    EEPROM.put(saveDataLocation, saveData);
+}
+
+void loadSaveData()
+{
+    EEPROM.get(saveDataLocation, saveData);
+}
+
+void clearSaveData()
+{
+	auto data = reinterpret_cast<uint8_t *>(&saveData);
+	for(size_t index = 0; index < sizeof(saveData); ++index)
+		data[index] = 0;
+	
+	saveSaveData();
 }
 
 void setup()
 {
     arduboy.begin();
     arduboy.clear();
+
+    // clearSaveData();
 }
 
 void loop()
@@ -129,6 +162,11 @@ void loop()
         case GameState::End:
             updateEnd();
             drawEnd();
+            break;
+        
+        case GameState::HighScore:
+            updateHighScores();
+            drawHighscores();
             break;
     }
 
@@ -437,24 +475,98 @@ void drawCloud()
 // End
 void updateEnd()
 {
+    if(!dino.autoJump)
+    {
+        if(game.score > saveData.highscores[0])
+            saveData.highscores[0] = game.score;
+        else if(game.score > saveData.highscores[1] && game.score < saveData.highscores[0])
+            saveData.highscores[1] = game.score;
+        else if(game.score > saveData.highscores[2] && game.score < saveData.highscores[1])
+            saveData.highscores[2] = game.score;
+    }
+
     if(arduboy.justPressed(A_BUTTON))
+    {
+        saveSaveData();
         gameState = GameState::Menu;
+    }
+    if(arduboy.justPressed(B_BUTTON))
+        gameState = GameState::HighScore;
 }
 
 void drawEnd()
 {
-    arduboy.drawLine(0, 22, Dimensions::width, 22);
-    Sprites::drawSelfMasked( (Dimensions::width - dinoDuckWidth) / 2, 14, dinoDuckImg, 2 );
-    Sprites::drawSelfMasked( 20, (23 - cactusHeight), cactusImg, 0 );
+    arduboy.drawLine(0, 20, Dimensions::width, 20);
+    Sprites::drawSelfMasked( (Dimensions::width - dinoDuckWidth) / 2, 12, dinoDuckImg, 2 );
+    Sprites::drawSelfMasked( 20, (21 - cactusHeight), cactusImg, 0 );
 
-    arduboy.setCursor( textToMiddle(10), 25);
+    arduboy.setCursor( textToMiddle(10), 22);
     arduboy.print(F("GAME OVER!"));
 
-    setCursorForScore(8, 35);
+    setCursorForScore(8, 32);
 
     arduboy.print(F("Score:"));
     arduboy.print(game.score);
 
-    arduboy.setCursor( (Dimensions::width - (arduboy.getCharacterWidth(12) + arduboy.getCharacterSpacing(11))) / 2 , 45);
-    arduboy.print(F("A to Restart"));
+    arduboy.setCursor( textToMiddle(9), 42);
+    arduboy.print(F("A:Restart"));
+
+    arduboy.setCursor( textToMiddle(12), 52);
+    arduboy.print(F("B:Highscores"));
+
+    arduboy.display();
+}
+
+void updateHighScores()
+{
+    if(arduboy.justPressed(B_BUTTON))
+        gameState = GameState::End;
+}
+
+void drawHighscores()
+{
+    arduboy.setCursor( textToMiddle(10), 5);
+    arduboy.print(F("Highscores:"));
+
+    arduboy.setCursorY(15);
+    if(saveData.highscores[0] < 100)
+        arduboy.setCursorX(textToMiddle(4));
+    else if(saveData.highscores[0] < 1000)
+        arduboy.setCursorX(textToMiddle(5));
+    else if(saveData.highscores[0] < 10000)
+        arduboy.setCursorX(textToMiddle(6));
+    else
+        arduboy.setCursorX(textToMiddle(7));
+
+    arduboy.print(F("1:"));
+    arduboy.print(saveData.highscores[0]);
+
+    arduboy.setCursorY(25);
+    if(saveData.highscores[1] < 100)
+        arduboy.setCursorX(textToMiddle(4));
+    else if(saveData.highscores[1] < 1000)
+        arduboy.setCursorX(textToMiddle(5));
+    else if(saveData.highscores[1] < 10000)
+        arduboy.setCursorX(textToMiddle(6));
+    else
+        arduboy.setCursorX(textToMiddle(7));
+
+    arduboy.print(F("2:"));
+    arduboy.print(saveData.highscores[1]);
+
+    arduboy.setCursorY(35);
+    if(saveData.highscores[2] < 100)
+        arduboy.setCursorX(textToMiddle(4));
+    else if(saveData.highscores[2] < 1000)
+        arduboy.setCursorX(textToMiddle(5));
+    else if(saveData.highscores[2] < 10000)
+        arduboy.setCursorX(textToMiddle(6));
+    else
+        arduboy.setCursorX(textToMiddle(7));
+
+    arduboy.print(F("3:"));
+    arduboy.print(saveData.highscores[2]);
+
+    arduboy.setCursor( textToMiddle(6), 45);
+    arduboy.print(F("B:Back"));
 }
