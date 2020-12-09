@@ -41,7 +41,7 @@ constexpr uint8_t scoreInterval = 32;
 struct SaveData
 {
     uint16_t highscores[3];
-    char firstLetter, secondLetter, thirdLetter;
+    char name[3];
 };
 SaveData saveData;
 
@@ -83,8 +83,7 @@ enum class GameState
     Menu,
     Game,
     End,
-    HighScore,
-    Keyboard
+    HighScore
 };
 GameState gameState = GameState::Menu;
 
@@ -169,11 +168,6 @@ void loop()
         case GameState::HighScore:
             updateHighScores();
             drawHighscores();
-            break;
-
-        case GameState::Keyboard:
-            updateKeyboard();
-            drawKeyboard();
             break;
     }
 
@@ -594,18 +588,3 @@ char alphabet[27] =
     'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
     'Y', 'Z',
 };
-
-char name[3];
-
-uint16_t arrowPosX = 54;
-uint8_t arrowPosY = 13;
-uint8_t letter = 0;
-
-// Keyboard
-void updateKeyboard()
-{
-}
-
-void drawKeyboard()
-{
-}
