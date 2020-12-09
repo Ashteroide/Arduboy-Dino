@@ -41,7 +41,7 @@ constexpr uint8_t scoreInterval = 32;
 struct SaveData
 {
     uint16_t highscores[3];
-    char firstPlace[3], secondPlace[3], thirdPlace[3];
+    char firstLetter, secondLetter, thirdLetter;
 };
 SaveData saveData;
 
@@ -87,13 +87,6 @@ enum class GameState
     Keyboard
 };
 GameState gameState = GameState::Menu;
-
-// High Score Keyboard
-struct KeyboardName
-{
-    uint16_t cursorPosX, cursorPosY;
-};
-KeyboardName keyboard;
 
 // Menu Cusor
 enum class MenuCursor
@@ -181,7 +174,6 @@ void loop()
         case GameState::Keyboard:
             updateKeyboard();
             drawKeyboard();
-            updateKeyboardCursor();
             break;
     }
 
@@ -490,9 +482,6 @@ void drawCloud()
 // End
 void updateEnd()
 {
-    keyboard.cursorPosX = (textToMiddle(8));
-    keyboard.cursorPosY = 18;
-
     if(!dino.autoJump)
     {
         if(game.score > saveData.highscores[0])
@@ -568,11 +557,6 @@ void drawHighscores()
     arduboy.print(F("1:"));
     arduboy.print(saveData.highscores[0]);
 
-    arduboy.print(" ");
-    arduboy.print(saveData.firstPlace[0]);
-    arduboy.print(saveData.firstPlace[1]);
-    arduboy.print(saveData.firstPlace[2]);
-
     arduboy.setCursorY(25);
     if(saveData.highscores[1] < 100)
         arduboy.setCursorX(textToMiddle(4));
@@ -603,94 +587,25 @@ void drawHighscores()
     arduboy.print(F("B:Back"));
 }
 
-struct LetterLocation
+char alphabet[27] =
 {
-    uint16_t Y;
-    static constexpr uint16_t letters[8] = { 40, 46, 52, 58, 64, 70, 76, 82 };
+    ' ', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+    'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+    'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+    'Y', 'Z',
 };
-LetterLocation firstRow = { 18 };
-LetterLocation secondRow = { 26 };
-LetterLocation thirdRow = { 34 };
 
-uint16_t letterPosition = 0;
+char name[3];
+
+uint16_t arrowPosX = 54;
+uint8_t arrowPosY = 13;
+uint8_t letter = 0;
 
 // Keyboard
 void updateKeyboard()
 {
-    if(arduboy.justPressed(A_BUTTON) && letterPosition <= 2)
-    {
-        letterChoice();
-        letterPosition += 1;
-    }
 }
-
-void letterChoice()
-{
-    if(keyboard.cursorPosY == firstRow.Y)
-    {
-        if(keyboard.cursorPosX == firstRow.letters[0])
-            saveData.firstPlace[letterPosition] = 'A';
-        else if(keyboard.cursorPosX == firstRow.letters[1])
-            saveData.firstPlace[letterPosition] = 'B';
-        else if(keyboard.cursorPosX == firstRow.letters[2])
-            saveData.firstPlace[letterPosition] = 'C';
-    }
-}
-
-const unsigned char EnterArrow[] PROGMEM =
-{
-    // Dimensions
-    6, 9,
-
-    // Frame 0 - Enter Arrow
-    0x00, 0x40, 0xe0, 0x40, 0x7e, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-};
 
 void drawKeyboard()
 {
-    arduboy.setCursor(0, 50);
-    arduboy.print(keyboard.cursorPosX);
-    arduboy.print(keyboard.cursorPosY);
-
-    arduboy.setCursor( textToMiddle(3), 10 );
-    arduboy.print(F("___"));
-
-    arduboy.setCursor( textToMiddle(3), 8 );
-    arduboy.print(saveData.firstPlace[0]);
-    arduboy.print(saveData.firstPlace[1]);
-    arduboy.print(saveData.firstPlace[2]);
-
-    arduboy.setCursor( textToMiddle(8), 18 );
-    arduboy.print(F("ABCDEFGH"));
-    
-    arduboy.setCursor( textToMiddle(8), 26 );
-    arduboy.print(F("IJKLMNOP"));
-
-    arduboy.setCursor( textToMiddle(8), 34 );
-    arduboy.print(F("QRSTUVWX"));
-
-    arduboy.setCursor( textToMiddle(2), 42 );
-    arduboy.print(F("YZ"));
-
-    Sprites::drawSelfMasked( (textToMiddle(2) + 12), 42, EnterArrow, 0);
-
-    arduboy.drawRect(keyboard.cursorPosX, keyboard.cursorPosY, 6, 8, WHITE);
-}
-
-void updateKeyboardCursor()
-{
-    if(arduboy.justPressed(RIGHT_BUTTON) && keyboard.cursorPosX < Dimensions::width - textToMiddle(8) - 6)
-        keyboard.cursorPosX += 6;
-    else if(arduboy.justPressed(LEFT_BUTTON) && keyboard.cursorPosX > textToMiddle(8))
-        keyboard.cursorPosX -= 6;
-
-    if(arduboy.justPressed(DOWN_BUTTON) && keyboard.cursorPosY < 42)
-        keyboard.cursorPosY += 8;
-    else if(arduboy.justPressed(UP_BUTTON) && keyboard.cursorPosY > 18)
-        keyboard.cursorPosY -= 8;
-
-    if(keyboard.cursorPosX < 58 && keyboard.cursorPosY == 42)
-        keyboard.cursorPosX = 58;
-    else if(keyboard.cursorPosX > 70 && keyboard.cursorPosY == 42)
-        keyboard.cursorPosX = 70;
 }
