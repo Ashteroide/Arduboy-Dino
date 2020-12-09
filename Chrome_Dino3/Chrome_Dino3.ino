@@ -41,6 +41,7 @@ constexpr uint8_t scoreInterval = 32;
 struct SaveData
 {
     uint16_t highscores[3];
+    char firstPlace[3], secondPlace[3], thirdPlace[3];
 };
 SaveData saveData;
 
@@ -90,12 +91,9 @@ GameState gameState = GameState::Menu;
 // High Score Keyboard
 struct KeyboardName
 {
-    char firstPlace[3], secondPlace[3], thirdPlace[3];
     uint16_t cursorPosX, cursorPosY;
 };
 KeyboardName keyboard;
-
-constexpr uint16_t highscoreNameLocation = 280;
 
 // Menu Cusor
 enum class MenuCursor
@@ -125,13 +123,11 @@ void reset()
 void saveSaveData()
 {
     EEPROM.put(saveDataLocation, saveData);
-    EEPROM.put(highscoreNameLocation, keyboard);
 }
 
 void loadSaveData()
 {
     EEPROM.get(saveDataLocation, saveData);
-    EEPROM.get(highscoreNameLocation, keyboard);
 }
 
 void clearSaveData()
@@ -501,19 +497,17 @@ void updateEnd()
     {
         if(game.score > saveData.highscores[0])
         {
+            saveData.highscores[2] = saveData.highscores[1];
+            saveData.highscores[1] = saveData.highscores[0];
             saveData.highscores[0] = game.score;
-            gameState = GameState::Keyboard;
         }
         else if(game.score > saveData.highscores[1] && game.score < saveData.highscores[0])
         {
+            saveData.highscores[2] = saveData.highscores[1];
             saveData.highscores[1] = game.score;
-            gameState = GameState::Keyboard;
         }
         else if(game.score > saveData.highscores[2] && game.score < saveData.highscores[1])
-        {
             saveData.highscores[2] = game.score;
-            gameState = GameState::Keyboard;
-        }
     }
 
     if(arduboy.justPressed(A_BUTTON))
@@ -574,6 +568,11 @@ void drawHighscores()
     arduboy.print(F("1:"));
     arduboy.print(saveData.highscores[0]);
 
+    arduboy.print(" ");
+    arduboy.print(saveData.firstPlace[0]);
+    arduboy.print(saveData.firstPlace[1]);
+    arduboy.print(saveData.firstPlace[2]);
+
     arduboy.setCursorY(25);
     if(saveData.highscores[1] < 100)
         arduboy.setCursorX(textToMiddle(4));
@@ -627,17 +626,25 @@ void updateKeyboard()
 
 void letterChoice()
 {
-    if(game.score > saveData.highscores[0])
     if(keyboard.cursorPosY == firstRow.Y)
     {
         if(keyboard.cursorPosX == firstRow.letters[0])
-            keyboard.firstPlace[letterPosition] = 'A';
+            saveData.firstPlace[letterPosition] = 'A';
         else if(keyboard.cursorPosX == firstRow.letters[1])
-            keyboard.firstPlace[letterPosition] = 'B';
+            saveData.firstPlace[letterPosition] = 'B';
         else if(keyboard.cursorPosX == firstRow.letters[2])
-            keyboard.firstPlace[letterPosition] = 'C';
+            saveData.firstPlace[letterPosition] = 'C';
     }
 }
+
+const unsigned char EnterArrow[] PROGMEM =
+{
+    // Dimensions
+    6, 9,
+
+    // Frame 0 - Enter Arrow
+    0x00, 0x40, 0xe0, 0x40, 0x7e, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
 
 void drawKeyboard()
 {
@@ -649,9 +656,9 @@ void drawKeyboard()
     arduboy.print(F("___"));
 
     arduboy.setCursor( textToMiddle(3), 8 );
-    arduboy.print(keyboard.firstPlace[0]);
-    arduboy.print(keyboard.firstPlace[1]);
-    arduboy.print(keyboard.firstPlace[2]);
+    arduboy.print(saveData.firstPlace[0]);
+    arduboy.print(saveData.firstPlace[1]);
+    arduboy.print(saveData.firstPlace[2]);
 
     arduboy.setCursor( textToMiddle(8), 18 );
     arduboy.print(F("ABCDEFGH"));
@@ -664,6 +671,8 @@ void drawKeyboard()
 
     arduboy.setCursor( textToMiddle(2), 42 );
     arduboy.print(F("YZ"));
+
+    Sprites::drawSelfMasked( (textToMiddle(2) + 12), 42, EnterArrow, 0);
 
     arduboy.drawRect(keyboard.cursorPosX, keyboard.cursorPosY, 6, 8, WHITE);
 }
@@ -682,6 +691,6 @@ void updateKeyboardCursor()
 
     if(keyboard.cursorPosX < 58 && keyboard.cursorPosY == 42)
         keyboard.cursorPosX = 58;
-    else if(keyboard.cursorPosX > 64 && keyboard.cursorPosY == 42)
-        keyboard.cursorPosX = 64;
+    else if(keyboard.cursorPosX > 70 && keyboard.cursorPosY == 42)
+        keyboard.cursorPosX = 70;
 }
