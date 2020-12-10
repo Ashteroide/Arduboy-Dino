@@ -47,6 +47,9 @@ SaveData saveData;
 
 constexpr uint16_t saveDataLocation = 272;
 
+uint8_t letter[3], nameCursor, place;
+uint16_t nameCursorPosX;
+
 // Dino Structure
 struct Dino
 {
@@ -96,24 +99,6 @@ enum class MenuCursor
     Sound
 };
 MenuCursor menuCursor = MenuCursor::Start;
-
-enum class NameCursor
-{
-    First,
-    Second,
-    Third
-};
-NameCursor nameCursor = NameCursor::First;
-
-uint16_t nameCursorPosX;
-
-enum class Place
-{
-    First,
-    Second,
-    Third
-};
-Place place;
 
 bool nameEntered = false;
 
@@ -258,7 +243,6 @@ void drawMenu()
         arduboy.setCursorX(textToMiddle(9));
         arduboy.print(F("Sound:Off"));
     }
-    
 }
 
 void updateStart()
@@ -513,7 +497,7 @@ void updateEnd()
 
             if(!nameEntered)
             {
-                place = Place::First;
+                place = 1;
                 gameState = GameState::Name;
                 nameEntered = true;
             }
@@ -525,7 +509,7 @@ void updateEnd()
 
             if(!nameEntered)
             {
-                place = Place::Second;
+                place = 2;
                 gameState = GameState::Name;
                 nameEntered = true;
             }
@@ -536,7 +520,7 @@ void updateEnd()
 
             if(!nameEntered)
             {
-                place = Place::Third;
+                place = 3;
                 gameState = GameState::Name;
                 nameEntered = true;
             }
@@ -590,13 +574,13 @@ void drawHighscores()
 
     arduboy.setCursorY(15);
     if(saveData.highscores[0] < 100)
-        arduboy.setCursorX(textToMiddle(4));
+        arduboy.setCursorX(textToMiddle(8));
     else if(saveData.highscores[0] < 1000)
-        arduboy.setCursorX(textToMiddle(5));
+        arduboy.setCursorX(textToMiddle(9));
     else if(saveData.highscores[0] < 10000)
-        arduboy.setCursorX(textToMiddle(6));
+        arduboy.setCursorX(textToMiddle(10));
     else
-        arduboy.setCursorX(textToMiddle(7));
+        arduboy.setCursorX(textToMiddle(11));
 
     arduboy.print(F("1:"));
     arduboy.print(saveData.highscores[0]);
@@ -607,13 +591,13 @@ void drawHighscores()
 
     arduboy.setCursorY(25);
     if(saveData.highscores[1] < 100)
-        arduboy.setCursorX(textToMiddle(4));
+        arduboy.setCursorX(textToMiddle(8));
     else if(saveData.highscores[1] < 1000)
-        arduboy.setCursorX(textToMiddle(5));
+        arduboy.setCursorX(textToMiddle(9));
     else if(saveData.highscores[1] < 10000)
-        arduboy.setCursorX(textToMiddle(6));
+        arduboy.setCursorX(textToMiddle(10));
     else
-        arduboy.setCursorX(textToMiddle(7));
+        arduboy.setCursorX(textToMiddle(11));
 
     arduboy.print(F("2:"));
     arduboy.print(saveData.highscores[1]);
@@ -624,13 +608,13 @@ void drawHighscores()
 
     arduboy.setCursorY(35);
     if(saveData.highscores[2] < 100)
-        arduboy.setCursorX(textToMiddle(4));
+        arduboy.setCursorX(textToMiddle(8));
     else if(saveData.highscores[2] < 1000)
-        arduboy.setCursorX(textToMiddle(5));
+        arduboy.setCursorX(textToMiddle(9));
     else if(saveData.highscores[2] < 10000)
-        arduboy.setCursorX(textToMiddle(6));
+        arduboy.setCursorX(textToMiddle(10));
     else
-        arduboy.setCursorX(textToMiddle(7));
+        arduboy.setCursorX(textToMiddle(11));
 
     arduboy.print(F("3:"));
     arduboy.print(saveData.highscores[2]);
@@ -651,81 +635,42 @@ char alphabet[27] =
     'Y', 'Z',
 };
 
-int letter[3], namePos;
-
 void updateName()
 {
     updateNameCursor();
 
-    if(nameCursor == NameCursor::First)
-        namePos = 0;
-    else if(nameCursor == NameCursor::Second)
-        namePos = 1;
-    else
-        namePos = 2;
-    
-    
-
-    if(letter[namePos] > 26)
-        letter[namePos] = 0;
-    else if(letter[namePos] < 0)
-        letter[namePos] = 26;
-
-    if(arduboy.justPressed(DOWN_BUTTON))
-    {
-        if(nameCursor == NameCursor::First)
-            letter[0] += 1;
-        else if(nameCursor == NameCursor::Second)
-            letter[1] += 1;
-        else if(nameCursor == NameCursor::Third)
-            letter[2] += 1;
-    }
-    else if(arduboy.justPressed(UP_BUTTON))
-    {
-        if(nameCursor == NameCursor::First)
-            letter[0] -= 1;
-        else if(nameCursor == NameCursor::Second)
-            letter[1] -= 1;
-        else if(nameCursor == NameCursor::Third)
-            letter[2] -= 1;
-    }
+    if(arduboy.justPressed(DOWN_BUTTON) && letter[nameCursor] < 26)
+        letter[nameCursor] += 1;
+    if(arduboy.justPressed(UP_BUTTON) && letter[nameCursor] > 0)
+        letter[nameCursor] -= 1;
 
     if(arduboy.justPressed(A_BUTTON))
     {
-        if(place == Place::First)
+        if(place == 1)
         {
-            saveData.thirdName[0] = saveData.secondName[0];
-            saveData.thirdName[1] = saveData.secondName[1];
-            saveData.thirdName[2] = saveData.secondName[2];
-
-            saveData.secondName[0] = saveData.firstName[0];
-            saveData.secondName[1] = saveData.firstName[1];
-            saveData.secondName[2] = saveData.firstName[2];
-
-            saveData.firstName[0] = alphabet[letter[0]];
-            saveData.firstName[1] = alphabet[letter[1]];
-            saveData.firstName[2] = alphabet[letter[2]];
+            for(int i = 0; i < 3; ++i)
+                saveData.thirdName[i] = saveData.secondName[i];
+            for(int i = 0; i < 3; ++i)
+                saveData.secondName[i] = saveData.firstName[i];
+            for(int i = 0; i < 3; ++i)
+                saveData.firstName[i] = alphabet[letter[i]];
         }
-        else if(place == Place::Second)
+        else if(place == 2)
         {
-            saveData.thirdName[0] = saveData.secondName[0];
-            saveData.thirdName[1] = saveData.secondName[1];
-            saveData.thirdName[2] = saveData.secondName[2];
-
-            saveData.secondName[0] = alphabet[letter[0]];
-            saveData.secondName[1] = alphabet[letter[1]];
-            saveData.secondName[2] = alphabet[letter[2]];
+            for(int i = 0; i < 3; ++i)
+                saveData.thirdName[i] = saveData.secondName[i];
+            for(int i = 0; i < 3; ++i)
+                saveData.secondName[i] = alphabet[letter[i]];
         }
         else
         {
-            saveData.thirdName[0] = alphabet[letter[0]];
-            saveData.thirdName[1] = alphabet[letter[1]];
-            saveData.thirdName[2] = alphabet[letter[2]];
+            for(int i = 0; i < 3; ++i)
+                saveData.thirdName[i] = alphabet[letter[i]];
         }
 
         saveSaveData();
         nameEntered = true;
-        gameState = GameState::End;
+        gameState = GameState::HighScore;
     }
 
 }
@@ -744,10 +689,10 @@ void drawName()
     arduboy.setCursor( textToMiddle(14), 2 );
     arduboy.print(F("New Highscore!"));
 
-    arduboy.setCursor( nameCursorPosX, 14 );
+    arduboy.setCursor( (textToMiddle(3) + (nameCursor * 6)), 14 );
     arduboy.print(F("^"));
 
-    Sprites::drawSelfMasked( nameCursorPosX, 24, DownArrow, 0 );
+    Sprites::drawSelfMasked( (textToMiddle(3) + (nameCursor * 6)), 24, DownArrow, 0 );
 
     arduboy.setCursor( textToMiddle(3), 20 );
     arduboy.print(F("___"));
@@ -760,28 +705,8 @@ void drawName()
 
 void updateNameCursor()
 {
-    switch(nameCursor)
-    {
-        case NameCursor::First:
-            nameCursorPosX = textToMiddle(3);
-            break;
-        
-        case NameCursor::Second:
-            nameCursorPosX = textToMiddle(3) + 6;
-            break;
-
-        case NameCursor::Third:
-            nameCursorPosX = textToMiddle(3) + 12;
-            break;
-    }
-
-    if(arduboy.justPressed(RIGHT_BUTTON) && nameCursor == NameCursor::First)
-        nameCursor = NameCursor::Second;
-    else if(arduboy.justPressed(RIGHT_BUTTON) && nameCursor == NameCursor::Second)
-        nameCursor = NameCursor::Third;
-    else if(arduboy.justPressed(LEFT_BUTTON) && nameCursor == NameCursor::Third)
-        nameCursor = NameCursor::Second;
-    else if(arduboy.justPressed(LEFT_BUTTON) && nameCursor == NameCursor::Second)
-        nameCursor = NameCursor::First;
-
+    if(arduboy.justPressed(RIGHT_BUTTON) && nameCursor < 2)
+        nameCursor += 1;
+    else if(arduboy.justPressed(LEFT_BUTTON) && nameCursor > 0)
+        nameCursor -= 1;
 }
