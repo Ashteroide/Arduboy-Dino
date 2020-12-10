@@ -1,6 +1,6 @@
 // Chrome Dino v3
-// 22 October, 2020
-// Ashlee J
+// Created: 22 October, 2020
+// Ashlee J (Ashteroide)
 
 #include <Arduboy2.h>
 #include <ArduboyTones.h>
@@ -502,7 +502,7 @@ void updateEnd()
 
             if(!nameEntered)
             {
-                place = 1;
+                place = 0;
                 gameState = GameState::Name;
                 nameEntered = true;
             }
@@ -514,7 +514,7 @@ void updateEnd()
 
             if(!nameEntered)
             {
-                place = 2;
+                place = 1;
                 gameState = GameState::Name;
                 nameEntered = true;
             }
@@ -525,7 +525,7 @@ void updateEnd()
 
             if(!nameEntered)
             {
-                place = 3;
+                place = 2;
                 gameState = GameState::Name;
                 nameEntered = true;
             }
@@ -590,9 +590,8 @@ void drawHighscores()
     arduboy.print(F("1:"));
     arduboy.print(saveData.highscores[0].score);
     arduboy.print(F(" "));
-    arduboy.print(saveData.highscores[0].name[0]);
-    arduboy.print(saveData.highscores[0].name[1]);
-    arduboy.print(saveData.highscores[0].name[2]);
+    for (size_t i = 0; i < 3; i++)
+        arduboy.print(saveData.highscores[0].name[i]);
 
     arduboy.setCursorY(25);
     if(saveData.highscores[1].score < 100)
@@ -607,9 +606,8 @@ void drawHighscores()
     arduboy.print(F("2:"));
     arduboy.print(saveData.highscores[1].score);
     arduboy.print(F(" "));
-    arduboy.print(saveData.highscores[1].name[0]);
-    arduboy.print(saveData.highscores[1].name[1]);
-    arduboy.print(saveData.highscores[1].name[2]);
+    for (size_t i = 0; i < 3; i++)
+        arduboy.print(saveData.highscores[1].name[i]);
 
     arduboy.setCursorY(35);
     if(saveData.highscores[2].score < 100)
@@ -624,9 +622,8 @@ void drawHighscores()
     arduboy.print(F("3:"));
     arduboy.print(saveData.highscores[2].score);
     arduboy.print(F(" "));
-    arduboy.print(saveData.highscores[2].name[0]);
-    arduboy.print(saveData.highscores[2].name[1]);
-    arduboy.print(saveData.highscores[2].name[2]);
+    for (size_t i = 0; i < 3; i++)
+        arduboy.print(saveData.highscores[2].name[i]);
 
     arduboy.setCursor( textToMiddle(6), 45);
     arduboy.print(F("B:Back"));
@@ -651,7 +648,7 @@ void updateName()
 
     if(arduboy.justPressed(A_BUTTON))
     {
-        if(place == 1)
+        if(place == 0)
         {
             for(size_t i = 0; i < 3; ++i)
                 saveData.highscores[2].name[i] = saveData.highscores[1].name[i];
@@ -660,7 +657,7 @@ void updateName()
             for(size_t i = 0; i < 3; ++i)
                 saveData.highscores[0].name[i] = alphabet[letter[i]];
         }
-        else if(place == 2)
+        else if(place == 1)
         {
             for(size_t i = 0; i < 3; ++i)
                 saveData.highscores[2].name[i] = saveData.highscores[1].name[i];
@@ -703,9 +700,9 @@ void drawName()
     arduboy.print(F("___"));
 
     arduboy.setCursor( textToMiddle(3), 18 );
-    arduboy.print(alphabet[letter[0]]);
-    arduboy.print(alphabet[letter[1]]);
-    arduboy.print(alphabet[letter[2]]);
+    for (size_t i = 0; i < 3; i++)
+        arduboy.print(alphabet[letter[i]]);
+    
 }
 
 void updateNameCursor()

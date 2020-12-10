@@ -1,10 +1,6 @@
 # Folders
-.vscode/
-Chrome_Dino3/build/
 
 # Files
-compile.command
-upload.command
 Chrome_Dino3/.DS_Store
-.DS_Store
 .gitignore
+Images/pterodactyl_1 - Copy.png
