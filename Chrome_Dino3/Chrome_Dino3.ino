@@ -37,11 +37,16 @@ Game game { 0, 0, false };
 constexpr uint8_t groundHeight = 62;
 constexpr uint8_t scoreInterval = 32;
 
+struct HighScoreEntry
+{
+    uint16_t score;
+    char name[3];
+};
+
 // High Score Structure
 struct SaveData
 {
-    uint16_t highscores[3];
-    char firstName[3], secondName[3], thirdName[3];
+    HighScoreEntry highscores[3];
 };
 SaveData saveData;
 
@@ -489,11 +494,11 @@ void updateEnd()
 {
     if(!dino.autoJump)
     {
-        if(game.score > saveData.highscores[0])
+        if(game.score > saveData.highscores[0].score)
         {
-            saveData.highscores[2] = saveData.highscores[1];
-            saveData.highscores[1] = saveData.highscores[0];
-            saveData.highscores[0] = game.score;
+            saveData.highscores[2].score = saveData.highscores[1].score;
+            saveData.highscores[1].score = saveData.highscores[0].score;
+            saveData.highscores[0].score = game.score;
 
             if(!nameEntered)
             {
@@ -502,10 +507,10 @@ void updateEnd()
                 nameEntered = true;
             }
         }
-        else if(game.score > saveData.highscores[1] && game.score < saveData.highscores[0])
+        else if(game.score > saveData.highscores[1].score && game.score < saveData.highscores[0].score)
         {
-            saveData.highscores[2] = saveData.highscores[1];
-            saveData.highscores[1] = game.score;
+            saveData.highscores[2].score = saveData.highscores[1].score;
+            saveData.highscores[1].score = game.score;
 
             if(!nameEntered)
             {
@@ -514,9 +519,9 @@ void updateEnd()
                 nameEntered = true;
             }
         }
-        else if(game.score > saveData.highscores[2] && game.score < saveData.highscores[1])
+        else if(game.score > saveData.highscores[2].score && game.score < saveData.highscores[1].score)
         {
-            saveData.highscores[2] = game.score;
+            saveData.highscores[2].score = game.score;
 
             if(!nameEntered)
             {
@@ -573,55 +578,55 @@ void drawHighscores()
     arduboy.print(F("Highscores:"));
 
     arduboy.setCursorY(15);
-    if(saveData.highscores[0] < 100)
+    if(saveData.highscores[0].score < 100)
         arduboy.setCursorX(textToMiddle(8));
-    else if(saveData.highscores[0] < 1000)
+    else if(saveData.highscores[0].score < 1000)
         arduboy.setCursorX(textToMiddle(9));
-    else if(saveData.highscores[0] < 10000)
+    else if(saveData.highscores[0].score < 10000)
         arduboy.setCursorX(textToMiddle(10));
     else
         arduboy.setCursorX(textToMiddle(11));
 
     arduboy.print(F("1:"));
-    arduboy.print(saveData.highscores[0]);
+    arduboy.print(saveData.highscores[0].score);
     arduboy.print(F(" "));
-    arduboy.print(saveData.firstName[0]);
-    arduboy.print(saveData.firstName[1]);
-    arduboy.print(saveData.firstName[2]);
+    arduboy.print(saveData.highscores[0].name[0]);
+    arduboy.print(saveData.highscores[0].name[1]);
+    arduboy.print(saveData.highscores[0].name[2]);
 
     arduboy.setCursorY(25);
-    if(saveData.highscores[1] < 100)
+    if(saveData.highscores[1].score < 100)
         arduboy.setCursorX(textToMiddle(8));
-    else if(saveData.highscores[1] < 1000)
+    else if(saveData.highscores[1].score < 1000)
         arduboy.setCursorX(textToMiddle(9));
-    else if(saveData.highscores[1] < 10000)
+    else if(saveData.highscores[1].score < 10000)
         arduboy.setCursorX(textToMiddle(10));
     else
         arduboy.setCursorX(textToMiddle(11));
 
     arduboy.print(F("2:"));
-    arduboy.print(saveData.highscores[1]);
+    arduboy.print(saveData.highscores[1].score);
     arduboy.print(F(" "));
-    arduboy.print(saveData.secondName[0]);
-    arduboy.print(saveData.secondName[1]);
-    arduboy.print(saveData.secondName[2]);
+    arduboy.print(saveData.highscores[1].name[0]);
+    arduboy.print(saveData.highscores[1].name[1]);
+    arduboy.print(saveData.highscores[1].name[2]);
 
     arduboy.setCursorY(35);
-    if(saveData.highscores[2] < 100)
+    if(saveData.highscores[2].score < 100)
         arduboy.setCursorX(textToMiddle(8));
-    else if(saveData.highscores[2] < 1000)
+    else if(saveData.highscores[2].score < 1000)
         arduboy.setCursorX(textToMiddle(9));
-    else if(saveData.highscores[2] < 10000)
+    else if(saveData.highscores[2].score < 10000)
         arduboy.setCursorX(textToMiddle(10));
     else
         arduboy.setCursorX(textToMiddle(11));
 
     arduboy.print(F("3:"));
-    arduboy.print(saveData.highscores[2]);
+    arduboy.print(saveData.highscores[2].score);
     arduboy.print(F(" "));
-    arduboy.print(saveData.thirdName[0]);
-    arduboy.print(saveData.thirdName[1]);
-    arduboy.print(saveData.thirdName[2]);
+    arduboy.print(saveData.highscores[2].name[0]);
+    arduboy.print(saveData.highscores[2].name[1]);
+    arduboy.print(saveData.highscores[2].name[2]);
 
     arduboy.setCursor( textToMiddle(6), 45);
     arduboy.print(F("B:Back"));
@@ -649,23 +654,23 @@ void updateName()
         if(place == 1)
         {
             for(size_t i = 0; i < 3; ++i)
-                saveData.thirdName[i] = saveData.secondName[i];
+                saveData.highscores[2].name[i] = saveData.highscores[1].name[i];
             for(size_t i = 0; i < 3; ++i)
-                saveData.secondName[i] = saveData.firstName[i];
+                saveData.highscores[1].name[i] = saveData.highscores[0].name[i];
             for(size_t i = 0; i < 3; ++i)
-                saveData.firstName[i] = alphabet[letter[i]];
+                saveData.highscores[0].name[i] = alphabet[letter[i]];
         }
         else if(place == 2)
         {
             for(size_t i = 0; i < 3; ++i)
-                saveData.thirdName[i] = saveData.secondName[i];
+                saveData.highscores[2].name[i] = saveData.highscores[1].name[i];
             for(size_t i = 0; i < 3; ++i)
-                saveData.secondName[i] = alphabet[letter[i]];
+                saveData.highscores[1].name[i] = alphabet[letter[i]];
         }
         else
         {
             for(size_t i = 0; i < 3; ++i)
-                saveData.thirdName[i] = alphabet[letter[i]];
+                saveData.highscores[2].name[i] = alphabet[letter[i]];
         }
 
         saveSaveData();
