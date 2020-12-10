@@ -648,23 +648,23 @@ void updateName()
     {
         if(place == 1)
         {
-            for(int i = 0; i < 3; ++i)
+            for(size_t i = 0; i < 3; ++i)
                 saveData.thirdName[i] = saveData.secondName[i];
-            for(int i = 0; i < 3; ++i)
+            for(size_t i = 0; i < 3; ++i)
                 saveData.secondName[i] = saveData.firstName[i];
-            for(int i = 0; i < 3; ++i)
+            for(size_t i = 0; i < 3; ++i)
                 saveData.firstName[i] = alphabet[letter[i]];
         }
         else if(place == 2)
         {
-            for(int i = 0; i < 3; ++i)
+            for(size_t i = 0; i < 3; ++i)
                 saveData.thirdName[i] = saveData.secondName[i];
-            for(int i = 0; i < 3; ++i)
+            for(size_t i = 0; i < 3; ++i)
                 saveData.secondName[i] = alphabet[letter[i]];
         }
         else
         {
-            for(int i = 0; i < 3; ++i)
+            for(size_t i = 0; i < 3; ++i)
                 saveData.thirdName[i] = alphabet[letter[i]];
         }
 
