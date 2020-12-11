@@ -492,44 +492,21 @@ void drawCloud()
 // End
 void updateEnd()
 {
-    if(!dino.autoJump)
+    if(!dino.autoJump && !nameEntered)
     {
-        if(game.score > saveData.highscores[0].score)
-        {
-            saveData.highscores[2].score = saveData.highscores[1].score;
-            saveData.highscores[1].score = saveData.highscores[0].score;
-            saveData.highscores[0].score = game.score;
-
-            if(!nameEntered)
+        for(size_t index = 0; index < 3; ++index)
+            if(game.score > saveData.highscores[index].score)
             {
-                place = 0;
-                gameState = GameState::Name;
-                nameEntered = true;
-            }
-        }
-        else if(game.score > saveData.highscores[1].score && game.score < saveData.highscores[0].score)
-        {
-            saveData.highscores[2].score = saveData.highscores[1].score;
-            saveData.highscores[1].score = game.score;
+                for(size_t nextIndex = (2 - index); nextIndex > 0; --nextIndex)
+                    saveData.highscores[nextIndex].score = saveData.highscores[nextIndex - 1].score;
 
-            if(!nameEntered)
-            {
-                place = 1;
-                gameState = GameState::Name;
-                nameEntered = true;
-            }
-        }
-        else if(game.score > saveData.highscores[2].score && game.score < saveData.highscores[1].score)
-        {
-            saveData.highscores[2].score = game.score;
+                saveData.highscores[index].score = game.score;
 
-            if(!nameEntered)
-            {
-                place = 2;
+                place = index;
                 gameState = GameState::Name;
-                nameEntered = true;
+
+                break;
             }
-        }
     }
 
     if(arduboy.justPressed(A_BUTTON))
