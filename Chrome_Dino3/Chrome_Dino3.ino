@@ -679,7 +679,6 @@ void drawName()
     arduboy.setCursor( textToMiddle(3), 18 );
     for (size_t i = 0; i < 3; i++)
         arduboy.print(alphabet[letter[i]]);
-    
 }
 
 void updateNameCursor()
