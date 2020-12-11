@@ -431,7 +431,7 @@ void dinoDucking()
         Sprites::drawSelfMasked(dino.x, dino.y, dinoDuckImg, 1);
 }
 
-// Pterodactyl
+// Ptero
 void updatePtero()
 {
     /*
