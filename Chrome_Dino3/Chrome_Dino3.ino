@@ -52,7 +52,7 @@ SaveData saveData;
 
 constexpr uint16_t saveDataLocation = 272;
 
-uint8_t letter[3], nameCursor, place;
+uint8_t letter[3], nameCursor;
 uint16_t nameCursorPosX;
 
 // Dino Structure
@@ -543,19 +543,12 @@ void updateHighScores()
                 if(game.score > saveData.highscores[index].score)
                 {
                     for(size_t nextIndex = (2 - index); nextIndex > 0; --nextIndex)
-                    {
-                        for(size_t letterIndex = 0; letterIndex < 3; ++letterIndex)
-                            saveData.highscores[nextIndex].name[index] = saveData.highscores[index].name[index];
-
                         saveData.highscores[nextIndex] = saveData.highscores[nextIndex - 1];
-                    }
 
                     saveData.highscores[index].score = game.score;
 
                     for(size_t letterIndex = 0; letterIndex < 3; ++letterIndex)
                         saveData.highscores[index].name[letterIndex] = alphabet[letter[letterIndex]];
-                    
-                    place = index;
                     
                     break;
                 }
