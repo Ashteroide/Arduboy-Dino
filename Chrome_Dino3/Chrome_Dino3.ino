@@ -526,6 +526,13 @@ void drawEnd()
     arduboy.display();
 }
 
+enum class HighScore
+{
+    ViewHighscores,
+    NameEntry
+};
+HighScore highscore = HighScore::ViewHighscores;
+
 // Highscore Menu
 void updateHighScores()
 {
@@ -538,24 +545,30 @@ void updateHighScores()
 
         if(arduboy.justPressed(A_BUTTON))
         {
-            for(size_t index = 0; index < 3; ++index)
-            {
-                if(game.score > saveData.highscores[index].score)
-                {
-                    for(size_t nextIndex = (2 - index); nextIndex > 0; --nextIndex)
-                        saveData.highscores[nextIndex] = saveData.highscores[nextIndex - 1];
 
-                    saveData.highscores[index].score = game.score;
-
-                    for(size_t letterIndex = 0; letterIndex < 3; ++letterIndex)
-                        saveData.highscores[index].name[letterIndex] = alphabet[letter[letterIndex]];
-                    
-                    break;
-                }
-            }
+            shiftHighscores();
 
             nameEntered = true;
             saveSaveData();
+        }
+    }
+}
+
+void shiftHighscores()
+{
+    for(size_t index = 0; index < 3; ++index)
+    {
+        if(game.score > saveData.highscores[index].score)
+        {
+            for(size_t nextIndex = index + 1; nextIndex < 3; ++nextIndex)
+                saveData.highscores[nextIndex] = saveData.highscores[index];
+
+            saveData.highscores[index].score = game.score;
+
+            for(size_t letterIndex = 0; letterIndex < 3; ++letterIndex)
+                saveData.highscores[index].name[letterIndex] = alphabet[letter[letterIndex]];
+            
+            break;
         }
     }
 }
@@ -580,7 +593,7 @@ void drawHighscores()
         {
             arduboy.setCursorY( (15 + (index * 10)) );
 
-            arduboy.setCursorX( textToMiddle(countDigit(saveData.highscores[index].score) + 5) );
+            arduboy.setCursorX( textToMiddle(countDigits(saveData.highscores[index].score) + 5) );
 
             arduboy.print(index + 1);
             arduboy.print(F(":"));
@@ -594,25 +607,28 @@ void drawHighscores()
         arduboy.print(F("B:Back"));
     }
     else
-    {
-        arduboy.setCursor( textToMiddle(14), 2 );
-        arduboy.print(F("New Highscore!"));
-
-        arduboy.setCursor( (textToMiddle(3) + (nameCursor * 6)), 14 );
-        arduboy.print(F("^"));
-
-        Sprites::drawSelfMasked( (textToMiddle(3) + (nameCursor * 6)), 24, DownArrow, 0 );
-
-        arduboy.setCursor( textToMiddle(3), 20 );
-        arduboy.print(F("___"));
-
-        arduboy.setCursor( textToMiddle(3), 18 );
-        for (size_t index = 0; index < 3; index++)
-            arduboy.print(alphabet[letter[index]]);
-    }
+        drawNameEntry();
 }
 
-int countDigit(int number)
+void drawNameEntry()
+{
+    arduboy.setCursor( textToMiddle(14), 2 );
+    arduboy.print(F("New Highscore!"));
+
+    arduboy.setCursor( (textToMiddle(3) + (nameCursor * 6)), 14 );
+    arduboy.print(F("^"));
+
+    Sprites::drawSelfMasked( (textToMiddle(3) + (nameCursor * 6)), 24, DownArrow, 0 );
+
+    arduboy.setCursor( textToMiddle(3), 20 );
+    arduboy.print(F("___"));
+
+    arduboy.setCursor( textToMiddle(3), 18 );
+    for (size_t index = 0; index < 3; index++)
+        arduboy.print(alphabet[letter[index]]);
+}
+
+int countDigits(uint16_t number)
 {
     int count = 0;
 
