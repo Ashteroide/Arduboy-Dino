@@ -91,8 +91,7 @@ enum class GameState
     Menu,
     Game,
     End,
-    HighScore,
-    Name
+    HighScore
 };
 GameState gameState = GameState::Menu;
 
@@ -180,11 +179,6 @@ void loop()
         case GameState::HighScore:
             updateHighScores();
             drawHighscores();
-            break;
-
-        case GameState::Name:
-            updateName();
-            drawName();
             break;
     }
 
@@ -489,33 +483,24 @@ void drawCloud()
     Sprites::drawSelfMasked(cloud.x, cloud.y, cloudImg, 0);
 }
 
+char alphabet[27] =
+{
+    ' ', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+    'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+    'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+    'Y', 'Z'
+};
+
 // End
 void updateEnd()
 {
-    if(!dino.autoJump && !nameEntered)
-    {
-        for(size_t index = 0; index < 3; ++index)
-            if(game.score > saveData.highscores[index].score)
-            {
-                for(size_t nextIndex = (2 - index); nextIndex > 0; --nextIndex)
-                    saveData.highscores[nextIndex].score = saveData.highscores[nextIndex - 1].score;
+    if(game.score < saveData.highscores[2].score)
+        nameEntered = true;
 
-                saveData.highscores[index].score = game.score;
-
-                place = index;
-                gameState = GameState::Name;
-
-                break;
-            }
-    }
-
-    if(arduboy.justPressed(A_BUTTON))
-    {
-        saveSaveData();
-        gameState = GameState::Menu;
-    }
-    if(arduboy.justPressed(B_BUTTON))
+    if(arduboy.justPressed(B_BUTTON) || !nameEntered)
         gameState = GameState::HighScore;
+    else if(arduboy.justPressed(A_BUTTON))
+        gameState = GameState::Menu;
 }
 
 void drawEnd()
@@ -541,117 +526,45 @@ void drawEnd()
     arduboy.display();
 }
 
-
 // Highscore Menu
 void updateHighScores()
 {
-    if(arduboy.justPressed(B_BUTTON))
+    if(arduboy.justPressed(B_BUTTON) && nameEntered)
         gameState = GameState::End;
-}
 
-void drawHighscores()
-{
-    arduboy.setCursor( textToMiddle(10), 5);
-    arduboy.print(F("Highscores:"));
-
-    arduboy.setCursorY(15);
-    if(saveData.highscores[0].score < 100)
-        arduboy.setCursorX(textToMiddle(8));
-    else if(saveData.highscores[0].score < 1000)
-        arduboy.setCursorX(textToMiddle(9));
-    else if(saveData.highscores[0].score < 10000)
-        arduboy.setCursorX(textToMiddle(10));
-    else
-        arduboy.setCursorX(textToMiddle(11));
-
-    arduboy.print(F("1:"));
-    arduboy.print(saveData.highscores[0].score);
-    arduboy.print(F(" "));
-    for (size_t i = 0; i < 3; i++)
-        arduboy.print(saveData.highscores[0].name[i]);
-
-    arduboy.setCursorY(25);
-    if(saveData.highscores[1].score < 100)
-        arduboy.setCursorX(textToMiddle(8));
-    else if(saveData.highscores[1].score < 1000)
-        arduboy.setCursorX(textToMiddle(9));
-    else if(saveData.highscores[1].score < 10000)
-        arduboy.setCursorX(textToMiddle(10));
-    else
-        arduboy.setCursorX(textToMiddle(11));
-
-    arduboy.print(F("2:"));
-    arduboy.print(saveData.highscores[1].score);
-    arduboy.print(F(" "));
-    for (size_t i = 0; i < 3; i++)
-        arduboy.print(saveData.highscores[1].name[i]);
-
-    arduboy.setCursorY(35);
-    if(saveData.highscores[2].score < 100)
-        arduboy.setCursorX(textToMiddle(8));
-    else if(saveData.highscores[2].score < 1000)
-        arduboy.setCursorX(textToMiddle(9));
-    else if(saveData.highscores[2].score < 10000)
-        arduboy.setCursorX(textToMiddle(10));
-    else
-        arduboy.setCursorX(textToMiddle(11));
-
-    arduboy.print(F("3:"));
-    arduboy.print(saveData.highscores[2].score);
-    arduboy.print(F(" "));
-    for (size_t i = 0; i < 3; i++)
-        arduboy.print(saveData.highscores[2].name[i]);
-
-    arduboy.setCursor( textToMiddle(6), 45);
-    arduboy.print(F("B:Back"));
-}
-
-char alphabet[27] =
-{
-    ' ', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
-    'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
-    'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
-    'Y', 'Z',
-};
-
-void updateName()
-{
-    updateNameCursor();
-
-    if(arduboy.justPressed(DOWN_BUTTON) && letter[nameCursor] < 26)
-        letter[nameCursor] += 1;
-    if(arduboy.justPressed(UP_BUTTON) && letter[nameCursor] > 0)
-        letter[nameCursor] -= 1;
-
-    if(arduboy.justPressed(A_BUTTON))
+    if(!dino.autoJump && !nameEntered)
     {
-        if(place == 0)
-        {
-            for(size_t i = 0; i < 3; ++i)
-                saveData.highscores[2].name[i] = saveData.highscores[1].name[i];
-            for(size_t i = 0; i < 3; ++i)
-                saveData.highscores[1].name[i] = saveData.highscores[0].name[i];
-            for(size_t i = 0; i < 3; ++i)
-                saveData.highscores[0].name[i] = alphabet[letter[i]];
-        }
-        else if(place == 1)
-        {
-            for(size_t i = 0; i < 3; ++i)
-                saveData.highscores[2].name[i] = saveData.highscores[1].name[i];
-            for(size_t i = 0; i < 3; ++i)
-                saveData.highscores[1].name[i] = alphabet[letter[i]];
-        }
-        else
-        {
-            for(size_t i = 0; i < 3; ++i)
-                saveData.highscores[2].name[i] = alphabet[letter[i]];
-        }
+        updateNameCursor();
 
-        saveSaveData();
-        nameEntered = true;
-        gameState = GameState::HighScore;
+        if(arduboy.justPressed(A_BUTTON))
+        {
+            for(size_t index = 0; index < 3; ++index)
+            {
+                if(game.score > saveData.highscores[index].score)
+                {
+                    for(size_t nextIndex = (2 - index); nextIndex > 0; --nextIndex)
+                    {
+                        for(size_t letterIndex = 0; letterIndex < 3; ++letterIndex)
+                            saveData.highscores[nextIndex].name[index] = saveData.highscores[index].name[index];
+
+                        saveData.highscores[nextIndex] = saveData.highscores[nextIndex - 1];
+                    }
+
+                    saveData.highscores[index].score = game.score;
+
+                    for(size_t letterIndex = 0; letterIndex < 3; ++letterIndex)
+                        saveData.highscores[index].name[letterIndex] = alphabet[letter[letterIndex]];
+                    
+                    place = index;
+                    
+                    break;
+                }
+            }
+
+            nameEntered = true;
+            saveSaveData();
+        }
     }
-
 }
 
 const unsigned char DownArrow[] PROGMEM = 
@@ -663,22 +576,59 @@ const unsigned char DownArrow[] PROGMEM =
     0x20, 0x40, 0x80, 0x40, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
-void drawName()
+void drawHighscores()
 {
-    arduboy.setCursor( textToMiddle(14), 2 );
-    arduboy.print(F("New Highscore!"));
+    if(nameEntered)
+    {
+        arduboy.setCursor( textToMiddle(10), 5);
+        arduboy.print(F("Highscores:"));
 
-    arduboy.setCursor( (textToMiddle(3) + (nameCursor * 6)), 14 );
-    arduboy.print(F("^"));
+        for(size_t index = 0; index < 3; ++index)
+        {
+            arduboy.setCursorY( (15 + (index * 10)) );
 
-    Sprites::drawSelfMasked( (textToMiddle(3) + (nameCursor * 6)), 24, DownArrow, 0 );
+            arduboy.setCursorX( textToMiddle(countDigit(saveData.highscores[index].score) + 5) );
 
-    arduboy.setCursor( textToMiddle(3), 20 );
-    arduboy.print(F("___"));
+            arduboy.print(index + 1);
+            arduboy.print(F(":"));
+            arduboy.print(saveData.highscores[index].score);
+            arduboy.print(F(" "));
+            for(size_t letterIndex = 0; letterIndex < 3; ++letterIndex)
+                arduboy.print(saveData.highscores[index].name[letterIndex]);
+        }
 
-    arduboy.setCursor( textToMiddle(3), 18 );
-    for (size_t i = 0; i < 3; i++)
-        arduboy.print(alphabet[letter[i]]);
+        arduboy.setCursor( textToMiddle(6), 45);
+        arduboy.print(F("B:Back"));
+    }
+    else
+    {
+        arduboy.setCursor( textToMiddle(14), 2 );
+        arduboy.print(F("New Highscore!"));
+
+        arduboy.setCursor( (textToMiddle(3) + (nameCursor * 6)), 14 );
+        arduboy.print(F("^"));
+
+        Sprites::drawSelfMasked( (textToMiddle(3) + (nameCursor * 6)), 24, DownArrow, 0 );
+
+        arduboy.setCursor( textToMiddle(3), 20 );
+        arduboy.print(F("___"));
+
+        arduboy.setCursor( textToMiddle(3), 18 );
+        for (size_t index = 0; index < 3; index++)
+            arduboy.print(alphabet[letter[index]]);
+    }
+}
+
+int countDigit(int number)
+{
+    int count = 0;
+
+    while(number != 0)
+    {
+        number = number / 10;
+        ++count;
+    }
+    return count;
 }
 
 void updateNameCursor()
@@ -687,4 +637,9 @@ void updateNameCursor()
         nameCursor += 1;
     else if(arduboy.justPressed(LEFT_BUTTON) && nameCursor > 0)
         nameCursor -= 1;
+
+    if(arduboy.justPressed(DOWN_BUTTON) && letter[nameCursor] < 26)
+        letter[nameCursor] += 1;
+    else if(arduboy.justPressed(UP_BUTTON) && letter[nameCursor] > 0)
+        letter[nameCursor] -= 1;
 }
