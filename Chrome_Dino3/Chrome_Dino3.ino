@@ -37,12 +37,6 @@ Game game { 0, 0, false };
 constexpr uint8_t groundHeight = 62;
 constexpr uint8_t scoreInterval = 32;
 
-// Object Structure
-struct Object
-{
-    float x, y, spd, accel;
-};
-
 // Menu Cusor
 enum class MenuCursor
 {
@@ -112,22 +106,23 @@ enum class DinoState
 DinoState dinoState = DinoState::Running;
 
 // Ptero
-Object ptero { Dimensions::width, (Dimensions::height - dinoHeight - random(6, 10)), 2, 0.02 };
-
-// PteroState
-struct PteroState
+struct Ptero
 {
-    bool Spawn;
+    uint16_t x = Dimensions::width;
+    uint8_t y = Dimensions::height - dinoHeight - random(6, 10);
+    uint16_t spd = 2;
+    float accel = 0.02;
+    bool spawn;
 
     void update()
     {
         /*
-        if(ptero.x > -pteroWidth && pteroState.Spawn)
-            ptero.x -= ptero.spd;
-        else if(pteroState.Spawn)
+        if(x > -pteroWidth && spawn)
+            x -= spd;
+        else if(spawn)
         {
-            ptero.x = Dimensions::width + random(pteroWidth, 100);
-            pteroState.Spawn = !pteroState.Spawn;
+            x = Dimensions::width + random(pteroWidth, 100);
+            spawn = !spawn;
         }
         */
     }
@@ -136,60 +131,69 @@ struct PteroState
     {
         /*
         if( (game.frame % (scoreInterval / 2)) != 0)
-            Sprites::drawSelfMasked(ptero.x, ptero.y, pteroImg, 0);
+            Sprites::drawSelfMasked(x, y, pteroImg, 0);
         else
-            Sprites::drawSelfMasked(ptero.x, ptero.y, pteroImg, 2);
+            Sprites::drawSelfMasked(x, y, pteroImg, 2);
 
         */
     }
 };
-PteroState pteroState;
+Ptero ptero;
 
 // Cactus
-Object cactus { Dimensions::width, 43, 2, 0.02 };
-
-// CactusState
-struct CactusState
+struct Cactus
 {
+    int16_t x = Dimensions::width;
+    uint16_t y = 43;
+    uint16_t spd = 2;
+    float accel = 0.02;
+
     void update()
     {
-        if(cactus.x > -20)
-            cactus.x -= cactus.spd;
+        if(x > -20)
+            x -= spd;
         else
         {
-            cactus.x = Dimensions::width + random(cactusWidth, Dimensions::width);
-            cactus.spd += cactus.accel;
-            pteroState.Spawn = true;
+            x = Dimensions::width + random(cactusWidth, Dimensions::width);
+            spd += accel;
+            ptero.spawn = true;
         }
 
     }
 
     void draw()
     {
-        Sprites::drawSelfMasked(cactus.x, cactus.y, cactusImg, 0);
+        Sprites::drawSelfMasked(x, y, cactusImg, 0);
+
+        arduboy.setCursor(0, 0);
+        arduboy.print(y);
+        arduboy.print(F(","));
+        arduboy.print(x);
     }
 };
-CactusState cactusState;
-
-Object cloud { Dimensions::width + cloudWidth, 10, 1, 0 };
+Cactus cactus;
 
 // Cloud
-struct CloudState
+struct Cloud
 {
+    uint16_t x = Dimensions::width + cloudWidth;
+    uint8_t y = 10;
+    uint8_t spd = 1;
+
     void update()
     {
-        if(cloud.x < -cloudWidth)
-            cloud.x = Dimensions::width + random(cloudWidth, 100);
+        if(x < -cloudWidth)
+            x = Dimensions::width + random(cloudWidth, 100);
         else
-            cloud.x -= cloud.spd;
+            x -= spd;
     }
 
     void draw()
     {
-        Sprites::drawSelfMasked(cloud.x, cloud.y, cloudImg, 0);
+        Sprites::drawSelfMasked(x, y, cloudImg, 0);
     }
 };
-CloudState cloudState;
+Cloud cloud;
 
 // Dino
 struct Dino
@@ -197,7 +201,7 @@ struct Dino
     static constexpr uint8_t step = 10;
     static constexpr uint8_t maxJump = 8;
     static constexpr uint8_t x = 5;
-    uint16_t y = (Dimensions::height - 2 - dinoHeight);
+    int16_t y = (Dimensions::height - 2 - dinoHeight);
     int jumpVel = 0;
     bool autoJump = false;
 
@@ -371,9 +375,9 @@ struct PlayState
     void update()
     {
         dino.update();
-        pteroState.update();
-        cactusState.update();
-        cloudState.update();
+        ptero.update();
+        cactus.update();
+        cloud.update();
 
         ++game.frame;
 
@@ -389,9 +393,9 @@ struct PlayState
 
         arduboy.print(game.score);
 
-        pteroState.draw();
-        cactusState.draw();
-        cloudState.draw();
+        ptero.draw();
+        cactus.draw();
+        cloud.draw();
     }
 };
 PlayState playState;
@@ -400,8 +404,11 @@ struct MenuState
 {
     void reset()
     {
-        cactus = { Dimensions::width, 43, 2, 0.02 };
-        cloud = { Dimensions::width + cloudWidth, 10, 1, 0 };
+        cactus.x = Dimensions::width;
+        cactus.spd = 2;
+        cactus.accel = 0.02;
+
+        cloud.x = Dimensions::width + cloudWidth;
 
         arduboy.initRandomSeed();
 
