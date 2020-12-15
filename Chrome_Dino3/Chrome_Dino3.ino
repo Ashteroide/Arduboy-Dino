@@ -26,17 +26,6 @@ struct Dimensions
 };
 Dimensions;
 
-// Game Structure
-struct Game
-{
-    uint16_t score, frame;
-    bool soundMode;
-};
-Game game { 0, 0, false };
-
-constexpr uint8_t groundHeight = 62;
-constexpr uint8_t scoreInterval = 32;
-
 // Menu Cusor
 enum class MenuCursor
 {
@@ -130,7 +119,7 @@ struct Ptero
     void draw()
     {
         /*
-        if( (game.frame % (scoreInterval / 2)) != 0)
+        if( (dino.frame % (scoreInterval / 2)) != 0)
             Sprites::drawSelfMasked(x, y, pteroImg, 0);
         else
             Sprites::drawSelfMasked(x, y, pteroImg, 2);
@@ -143,9 +132,9 @@ Ptero ptero;
 // Cactus
 struct Cactus
 {
-    int16_t x = Dimensions::width;
+    float x = Dimensions::width;
     uint16_t y = 43;
-    uint16_t spd = 2;
+    float spd = 2;
     float accel = 0.02;
 
     void update()
@@ -164,11 +153,6 @@ struct Cactus
     void draw()
     {
         Sprites::drawSelfMasked(x, y, cactusImg, 0);
-
-        arduboy.setCursor(0, 0);
-        arduboy.print(y);
-        arduboy.print(F(","));
-        arduboy.print(x);
     }
 };
 Cactus cactus;
@@ -199,11 +183,14 @@ Cloud cloud;
 struct Dino
 {
     static constexpr uint8_t step = 10;
+    uint16_t frame = 0;
     static constexpr uint8_t maxJump = 8;
+    static constexpr uint8_t groundHeight = 62;
     static constexpr uint8_t x = 5;
     int16_t y = (Dimensions::height - 2 - dinoHeight);
     int jumpVel = 0;
     bool autoJump = false;
+    bool soundMode = false;
 
     void update()
     {
@@ -231,7 +218,7 @@ struct Dino
         {
             gameState = ChromeDino::End;
 
-            if(game.soundMode)
+            if(soundMode)
                 sound.tone(500, 100, 250, 200);
         }
 
@@ -253,7 +240,7 @@ struct Dino
         {
             dinoState = DinoState::Jumping;
 
-            if(game.soundMode)
+            if(soundMode)
                 sound.tone(500, 50);
         }
 
@@ -261,11 +248,11 @@ struct Dino
         {
             dinoState = DinoState::Ducking;
 
-            if(game.soundMode)
+            if(soundMode)
                 sound.tone(250, 50);
         }
 
-        if( ((game.frame % step) / 4 != 0))
+        if( ((frame % step) / 4 != 0))
             Sprites::drawSelfMasked(x, y, dinoImg, 1);
         else
             Sprites::drawSelfMasked(x, y, dinoImg, 2);
@@ -298,7 +285,7 @@ struct Dino
 
         y = groundHeight - dinoDuckHeight;
 
-        if((game.frame % step) / 4 != 0)
+        if((frame % step) / 4 != 0)
             Sprites::drawSelfMasked(x, y, dinoDuckImg, 0);
         else
             Sprites::drawSelfMasked(x, y, dinoDuckImg, 1);
@@ -306,71 +293,11 @@ struct Dino
 };
 Dino dino;
 
-struct StartState
+// GamePlay
+struct GamePlay
 {
-    void update()
-    {
-        if(arduboy.justPressed(DOWN_BUTTON) && menuCursor != MenuCursor::AI)
-            menuCursor = MenuCursor::AI;
-
-        arduboy.setCursor( (textToMiddle(8) / 2), 30);
-        arduboy.print(F("A>"));
-    }
-};
-StartState startState;
-
-struct AutoJumpState
-{
-    void update()
-    {
-        if(arduboy.justPressed(A_BUTTON))
-            dino.autoJump = !dino.autoJump;
-
-        if(arduboy.justPressed(UP_BUTTON))
-            menuCursor = MenuCursor::Start;
-        else if(arduboy.justPressed(DOWN_BUTTON))
-            menuCursor = MenuCursor::Sound;
-
-        arduboy.setCursor( (textToMiddle(11) / 2), 38);
-        arduboy.print(F("A>"));
-    }
-};
-AutoJumpState autoJumpState;
-
-struct SoundState
-{
-    void update()
-    {
-        if(arduboy.justPressed(A_BUTTON))
-            game.soundMode = !game.soundMode;
-
-        if(arduboy.justPressed(UP_BUTTON))
-            menuCursor = MenuCursor::AI;
-
-        arduboy.setCursor( (textToMiddle(4) / 2), 46);
-        arduboy.print(F("A>"));
-    }
-};
-SoundState soundState;
-
-// SetCursorForScore
-void setCursorForScore(uint8_t x, uint8_t y)
-{
-    arduboy.setCursorY(y);
-
-    if(game.score < 100)
-        arduboy.setCursorX(textToMiddle(x + 0));
-    else if(game.score < 1000)
-        arduboy.setCursorX(textToMiddle(x + 1));
-    else if(game.score < 10000)
-        arduboy.setCursorX(textToMiddle(x + 2));
-    else
-        arduboy.setCursorX(textToMiddle(x + 3));
-}
-
-// PlayState
-struct PlayState
-{
+    uint16_t score = 0;
+    static constexpr uint8_t scoreInterval = 32;
 
     void update()
     {
@@ -379,27 +306,43 @@ struct PlayState
         cactus.update();
         cloud.update();
 
-        ++game.frame;
+        ++dino.frame;
 
-        if((game.frame % scoreInterval) != 0)
-            ++game.score;
+        if((dino.frame % scoreInterval) != 0)
+            ++score;
     }
 
     void draw()
     {
-        arduboy.drawLine(0, groundHeight, Dimensions::width, groundHeight);
+        arduboy.drawLine(0, dino.groundHeight, Dimensions::width, dino.groundHeight);
 
         setCursorForScore(2, 5);
 
-        arduboy.print(game.score);
+        arduboy.print(score);
 
         ptero.draw();
         cactus.draw();
         cloud.draw();
     }
 };
-PlayState playState;
+GamePlay gamePlay;
 
+// SetCursorForScore
+void setCursorForScore(uint8_t x, uint8_t y)
+{
+    arduboy.setCursorY(y);
+
+    if(gamePlay.score < 100)
+        arduboy.setCursorX(textToMiddle(x + 0));
+    else if(gamePlay.score < 1000)
+        arduboy.setCursorX(textToMiddle(x + 1));
+    else if(gamePlay.score < 10000)
+        arduboy.setCursorX(textToMiddle(x + 2));
+    else
+        arduboy.setCursorX(textToMiddle(x + 3));
+}
+
+// MenuState
 struct MenuState
 {
     void reset()
@@ -414,7 +357,8 @@ struct MenuState
 
         dinoState = DinoState::Running;
 
-        game = { 0, 0, game.soundMode };
+        gamePlay.score = 0;
+        dino.frame = 0;
 
         data.load();
     }
@@ -430,15 +374,15 @@ struct MenuState
         switch(menuCursor)
         {
             case MenuCursor::Start:
-                startState.update();
+                updateStart();
                 break;
 
             case MenuCursor::AI:
-                autoJumpState.update();
+                updateAutoJump();
                 break;
 
             case MenuCursor::Sound:
-                soundState.update();
+                updateSound();
                 break;
         }
     }
@@ -465,7 +409,7 @@ struct MenuState
 
         arduboy.setCursorY(46);
 
-        if(game.soundMode)
+        if(dino.soundMode)
         {
             arduboy.setCursorX(textToMiddle(8));
             arduboy.print(F("Sound:On"));
@@ -476,6 +420,41 @@ struct MenuState
             arduboy.print(F("Sound:Off"));
         }
     }
+
+    void updateSound()
+    {
+        if(arduboy.justPressed(A_BUTTON))
+            dino.soundMode = !dino.soundMode;
+
+        if(arduboy.justPressed(UP_BUTTON))
+            menuCursor = MenuCursor::AI;
+
+        arduboy.setCursor( (textToMiddle(4) / 2), 46);
+        arduboy.print(F("A>"));
+    }
+
+    void updateAutoJump()
+    {
+        if(arduboy.justPressed(A_BUTTON))
+            dino.autoJump = !dino.autoJump;
+
+        if(arduboy.justPressed(UP_BUTTON))
+            menuCursor = MenuCursor::Start;
+        else if(arduboy.justPressed(DOWN_BUTTON))
+            menuCursor = MenuCursor::Sound;
+
+        arduboy.setCursor( (textToMiddle(11) / 2), 38);
+        arduboy.print(F("A>"));
+    }
+
+    void updateStart()
+    {
+        if(arduboy.justPressed(DOWN_BUTTON) && menuCursor != MenuCursor::AI)
+            menuCursor = MenuCursor::AI;
+
+        arduboy.setCursor( (textToMiddle(8) / 2), 30);
+        arduboy.print(F("A>"));
+    }
 };
 MenuState menuState;
 
@@ -484,7 +463,7 @@ struct EndState
 {
     void update()
     {
-        if(game.score > data.highscores[2].score && !dino.autoJump)
+        if(gamePlay.score > data.highscores[2].score && !dino.autoJump)
             gameState = ChromeDino::NameEntry;
         
 
@@ -506,7 +485,7 @@ struct EndState
         setCursorForScore(8, 32);
 
         arduboy.print(F("Score:"));
-        arduboy.print(game.score);
+        arduboy.print(gamePlay.score);
 
         arduboy.setCursor( textToMiddle(9), 42 );
         arduboy.print(F("A:Restart"));
@@ -536,8 +515,8 @@ const unsigned char DownArrow[] PROGMEM =
     0x20, 0x40, 0x80, 0x40, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
-// Name Variables
-uint8_t letter[3], nameCursor;
+// Highscore and NameEntry Variables
+uint8_t letter[3];
 
 // HighScoreState
 struct HighScoreState
@@ -552,12 +531,12 @@ struct HighScoreState
     {
         for(size_t index = 0; index < 3; ++index)
         {
-            if(game.score > data.highscores[index].score)
+            if(gamePlay.score > data.highscores[index].score)
             {
                 for(size_t nextIndex = 2; nextIndex > index; --nextIndex)
                     data.highscores[nextIndex] = data.highscores[nextIndex - 1];
 
-                data.highscores[index].score = game.score;
+                data.highscores[index].score = gamePlay.score;
 
                 for(size_t letterIndex = 0; letterIndex < 3; ++letterIndex)
                     data.highscores[index].name[letterIndex] = alphabet[letter[letterIndex]];
@@ -592,22 +571,11 @@ struct HighScoreState
 };
 HighScoreState highScoreState;
 
-// CountDigits in Number
-int countDigits(uint16_t number)
+// NameEntryState
+struct NameEntry
 {
-    int count = 0;
-
-    while(number != 0)
-    {
-        number = number / 10;
-        ++count;
-    }
-    return count;
-}
-
-// NamEntryState
-struct NameEntryState
-{
+    uint8_t nameCursor;
+    
     void update()
     {
         if(arduboy.justPressed(A_BUTTON))
@@ -638,9 +606,9 @@ struct NameEntryState
         for (size_t index = 0; index < 3; index++)
             arduboy.print(alphabet[letter[index]]);
 
-        arduboy.setCursor( textToMiddle(6 + countDigits(game.score)), 35);
+        arduboy.setCursor( textToMiddle(6 + countDigits(gamePlay.score)), 35);
         arduboy.print(F("Score:"));
-        arduboy.print(game.score);
+        arduboy.print(gamePlay.score);
 
         arduboy.setCursor( textToMiddle(12), 45 );
         arduboy.print(F("A:Enter Name"));
@@ -659,7 +627,20 @@ struct NameEntryState
             letter[nameCursor] -= 1;
     }
 };
-NameEntryState nameEntryState;
+NameEntry nameEntry;
+
+// CountDigits in Number
+int countDigits(uint16_t number)
+{
+    int count = 0;
+
+    while(number != 0)
+    {
+        number = number / 10;
+        ++count;
+    }
+    return count;
+}
 
 void setup()
 {
@@ -686,8 +667,8 @@ void loop()
             break;
 
         case ChromeDino::Game:
-            playState.update();
-            playState.draw();
+            gamePlay.update();
+            gamePlay.draw();
             break;
 
         case ChromeDino::End:
@@ -701,9 +682,9 @@ void loop()
             break;
 
         case ChromeDino::NameEntry:
-            nameEntryState.updateNameCursor();
-            nameEntryState.update();
-            nameEntryState.draw();
+            nameEntry.updateNameCursor();
+            nameEntry.update();
+            nameEntry.draw();
             break;
     }
 
