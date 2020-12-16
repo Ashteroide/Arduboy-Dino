@@ -8,15 +8,7 @@
 Arduboy2 arduboy;
 ArduboyTones sound(arduboy.audio.enabled);
 
-#include "dino.h"
-#include "dinoDuck.h"
-
-#include "pterodactyl.h"
-
-#include "cactus.h"
-#include "cloud.h"
-
-#include "TitleScreen.h"
+#include "Images.h"
 
 // Screen Structure
 struct Dimensions
@@ -515,9 +507,6 @@ const unsigned char DownArrow[] PROGMEM =
     0x20, 0x40, 0x80, 0x40, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
-// Highscore and NameEntry Variables
-uint8_t letter[3];
-
 // HighScoreState
 struct HighScoreState
 {
@@ -525,25 +514,6 @@ struct HighScoreState
     {
         if(arduboy.justPressed(B_BUTTON))
             gameState = ChromeDino::Menu;
-    }
-
-    void shift()
-    {
-        for(size_t index = 0; index < 3; ++index)
-        {
-            if(gamePlay.score > data.highscores[index].score)
-            {
-                for(size_t nextIndex = 2; nextIndex > index; --nextIndex)
-                    data.highscores[nextIndex] = data.highscores[nextIndex - 1];
-
-                data.highscores[index].score = gamePlay.score;
-
-                for(size_t letterIndex = 0; letterIndex < 3; ++letterIndex)
-                    data.highscores[index].name[letterIndex] = alphabet[letter[letterIndex]];
-                
-                break;
-            }
-        }
     }
 
     void draw()
@@ -575,12 +545,13 @@ HighScoreState highScoreState;
 struct NameEntry
 {
     uint8_t nameCursor;
-    
+    uint8_t letter[3];
+
     void update()
     {
         if(arduboy.justPressed(A_BUTTON))
         {
-            highScoreState.shift();
+            shift();
             data.save();
 
             nameCursor = 0;
@@ -612,6 +583,25 @@ struct NameEntry
 
         arduboy.setCursor( textToMiddle(12), 45 );
         arduboy.print(F("A:Enter Name"));
+    }
+
+    void shift()
+    {
+        for(size_t index = 0; index < 3; ++index)
+        {
+            if(gamePlay.score > data.highscores[index].score)
+            {
+                for(size_t nextIndex = 2; nextIndex > index; --nextIndex)
+                    data.highscores[nextIndex] = data.highscores[nextIndex - 1];
+
+                data.highscores[index].score = gamePlay.score;
+
+                for(size_t letterIndex = 0; letterIndex < 3; ++letterIndex)
+                    data.highscores[index].name[letterIndex] = alphabet[letter[letterIndex]];
+                
+                break;
+            }
+        }
     }
 
     void updateNameCursor()
