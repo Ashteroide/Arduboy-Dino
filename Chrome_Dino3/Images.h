@@ -4,3 +4,4 @@
 #include "Sprites/dinoDuck.h"
 #include "Sprites/pterodactyl.h"
 #include "Sprites/TitleScreen.h"
+#include "Sprites/DownArrow.h"
