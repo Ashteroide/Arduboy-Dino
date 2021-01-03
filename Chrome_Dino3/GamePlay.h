@@ -6,21 +6,6 @@ struct GamePlay
     uint16_t score = 0;
     static constexpr uint8_t scoreInterval = 32;
 
-    // SetCursorForScore
-    void setCursorForScore(uint8_t x, uint8_t y)
-    {
-        arduboy.setCursorY(y);
-
-        if(score < 100)
-            arduboy.setCursorX(textToMiddle(x + 0));
-        else if(score < 1000)
-            arduboy.setCursorX(textToMiddle(x + 1));
-        else if(score < 10000)
-            arduboy.setCursorX(textToMiddle(x + 2));
-        else
-            arduboy.setCursorX(textToMiddle(x + 3));
-    }
-
     void update()
     {
         dino.update();
@@ -38,7 +23,7 @@ struct GamePlay
     {
         arduboy.drawLine(0, dino.groundHeight, Dimensions::width, dino.groundHeight);
 
-        setCursorForScore(2, 5);
+        setCursorForScore(2, 5, score);
 
         arduboy.print(score);
 

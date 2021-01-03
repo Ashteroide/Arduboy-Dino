@@ -57,6 +57,8 @@ DinoState dinoState = DinoState::Running;
 #include "Cloud.h"
 #include "Dino.h"
 
+#include "SetCursorForScore.h"
+
 #include "GamePlay.h"
 
 #include "MenuState.h"
@@ -64,18 +66,7 @@ DinoState dinoState = DinoState::Running;
 
 #include "Alphabet.h"
 
-// CountDigits in Number
-int countDigits(uint16_t number)
-{
-    int count = 0;
-
-    while(number != 0)
-    {
-        number = number / 10;
-        ++count;
-    }
-    return count;
-}
+#include "CountDigits.h"
 
 #include "HighScores.h"
 #include "NameEntry.h"

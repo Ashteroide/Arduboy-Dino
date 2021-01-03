@@ -3,21 +3,6 @@
 // EndState
 struct EndState
 {
-    // SetCursorForScore
-    void setCursorForScore(uint8_t x, uint8_t y)
-    {
-        arduboy.setCursorY(y);
-
-        if(gamePlay.score < 100)
-            arduboy.setCursorX(textToMiddle(x + 0));
-        else if(gamePlay.score < 1000)
-            arduboy.setCursorX(textToMiddle(x + 1));
-        else if(gamePlay.score < 10000)
-            arduboy.setCursorX(textToMiddle(x + 2));
-        else
-            arduboy.setCursorX(textToMiddle(x + 3));
-    }
-
     void update()
     {
         if(gamePlay.score > data.highscores[2].score && !dino.autoJump)
@@ -39,7 +24,7 @@ struct EndState
         arduboy.setCursor( textToMiddle(10), 22 );
         arduboy.print(F("GAME OVER!"));
 
-        setCursorForScore(8, 32);
+        setCursorForScore(8, 32, gamePlay.score);
 
         arduboy.print(F("Score:"));
         arduboy.print(gamePlay.score);
