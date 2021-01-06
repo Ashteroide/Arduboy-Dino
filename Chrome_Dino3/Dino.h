@@ -3,113 +3,111 @@
 // Dino
 struct Dino
 {
-    static constexpr uint8_t step = 10;
-    uint16_t frame = 0;
-    static constexpr uint8_t maxJump = 8;
+    static constexpr uint8_t animationStep = 40;
+    static constexpr uint8_t maxJumpHeight = 8;
     static constexpr uint8_t groundHeight = 62;
     static constexpr uint8_t x = 5;
-    int16_t y = (Dimensions::height - 2 - dinoHeight);
-    int jumpVel = 0;
+    int16_t y = (Arduboy2::height() - 2 - dinoHeight);
+    uint16_t dinoFrameCounter = 0;
+    int8_t jumpVelocity = 0;
     bool autoJump = false;
-    bool soundMode = false;
 
     void update()
     {
         switch(dinoState)
         {
-            case DinoState::Running:
-                Running();
+            case DinoState::updateRunningState:
+                updateRunningState();
                 break;
             
-            case DinoState::Jumping:
-                Jumping();
+            case DinoState::updateJumpingState:
+                updateJumpingState();
                 break;
 
-            case DinoState::Falling:
-                Falling();
+            case DinoState::updateFallingState:
+                updateFallingState();
                 break;
 
-            case DinoState::Ducking:
-                Ducking();
+            case DinoState::updateDuckingState:
+                updateDuckingState();
                 break;
         }
         
         // Collision Detection
-        if( (y + dinoHeight) > cactus.y && (x + dinoWidth - 4) > cactus.x && (x + dinoWidth - 4) < cactus.x + cactusWidth )
+        if((this->y + dinoHeight) > cactus.y && (this->x + dinoWidth - 4) > cactus.x && (this->x + dinoWidth - 4) < cactus.x + cactusWidth)
         {
-            gameState = ChromeDino::End;
+            gameState = GameState::End;
 
-            if(soundMode)
-                sound.tone(500, 100, 250, 200);
+            sound.tone(500, 100, 250, 200);
         }
 
-        y += jumpVel;
+        this->y += this->jumpVelocity;
+
+        ++this->dinoFrameCounter;
     }
 
-    void Running()
+    void updateRunningState()
     {
-        jumpVel = 0;
-        y = groundHeight - dinoHeight;
+        this->jumpVelocity = 0;
+        this->y = this->groundHeight - dinoHeight;
 
-        if(autoJump)
+        if(this->autoJump)
         {
-            if(cactus.x - (x + cactusWidth) < (cactus.spd * cactusHeight) && (cactus.x - x) > 5)
-                dinoState = DinoState::Jumping;
+            if(cactus.x - (this->x + cactusWidth) < (cactus.spd * cactusHeight) && (cactus.x - this->x) > 5)
+                dinoState = DinoState::updateJumpingState;
         }
 
         if(arduboy.justPressed(UP_BUTTON))
         {
-            dinoState = DinoState::Jumping;
+            dinoState = DinoState::updateJumpingState;
 
-            if(soundMode)
-                sound.tone(500, 50);
+            sound.tone(500, 50);
         }
 
         else if(arduboy.pressed(DOWN_BUTTON))
         {
-            dinoState = DinoState::Ducking;
+            dinoState = DinoState::updateDuckingState;
 
-            if(soundMode)
-                sound.tone(250, 50);
+            sound.tone(250, 50);
         }
 
-        if( ((frame % step) / 4 != 0))
-            Sprites::drawSelfMasked(x, y, dinoImg, 1);
+        if((this->dinoFrameCounter % this->animationStep) != 0)
+            Sprites::drawSelfMasked(this->x, this->y, dinoImg, 2);
         else
-            Sprites::drawSelfMasked(x, y, dinoImg, 2);
+            Sprites::drawSelfMasked(this->x, this->y, dinoImg, 1);
     }
 
-    void Jumping()
+    void updateJumpingState()
     {
-        if(y <= maxJump)
-            dinoState = DinoState::Falling;
+        if(this->y <= this->maxJumpHeight)
+            dinoState = DinoState::updateFallingState;
         else
-            jumpVel = -2;
+            this->jumpVelocity = -2;
 
-        Sprites::drawSelfMasked(x, y, dinoImg, 0);
+        Sprites::drawSelfMasked(this->x, this->y, dinoImg, 0);
     }
 
-    void Falling()
+    void updateFallingState()
     {
-        if(y >= (groundHeight - dinoHeight))
-            dinoState = DinoState::Running;
+        if(this->y >= (this->groundHeight - dinoHeight))
+            dinoState = DinoState::updateRunningState;
         else
-            jumpVel = 2;
+            this->jumpVelocity = 2;
 
-        Sprites::drawSelfMasked(x, y, dinoImg, 0);
+        Sprites::drawSelfMasked(this->x, this->y, dinoImg, 0);
     }
 
-    void Ducking()
+    void updateDuckingState()
     {
         if(arduboy.justReleased(DOWN_BUTTON))
-            dinoState = DinoState::Running;
+            dinoState = DinoState::updateRunningState;
 
-        y = groundHeight - dinoDuckHeight;
+        this->y = this->groundHeight - dinoDuckHeight;
 
-        if((frame % step) / 4 != 0)
-            Sprites::drawSelfMasked(x, y, dinoDuckImg, 0);
+        if((this->dinoFrameCounter % this->animationStep) != 0)
+            Sprites::drawSelfMasked(this->x, this->y, dinoDuckImg, 1);
         else
-            Sprites::drawSelfMasked(x, y, dinoDuckImg, 1);
+            Sprites::drawSelfMasked(this->x, this->y, dinoDuckImg, 0);
     }
 };
 Dino dino;

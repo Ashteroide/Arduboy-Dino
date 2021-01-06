@@ -3,34 +3,28 @@
 // Ptero
 struct Ptero
 {
-    uint16_t x = Dimensions::width;
-    uint8_t y = Dimensions::height - dinoHeight - random(6, 10);
-    uint16_t spd = 2;
-    float accel = 0.02;
-    bool spawn;
+    static constexpr uint8_t step = 10;
+    int16_t x = Arduboy2::width();
+    int8_t y = Arduboy2::height() - dinoHeight - random(6, 10);
+    uint8_t cactusDistance;
+    uint16_t frame = 0;
 
     void update()
     {
-        /*
-        if(x > -pteroWidth && spawn)
-            x -= spd;
-        else if(spawn)
-        {
-            x = Dimensions::width + random(pteroWidth, 100);
-            spawn = !spawn;
-        }
-        */
+        if(cactus.x < -20)
+            this->cactusDistance = random(50, 80);
+        if(cactus.spawnPtero)
+            this->x = cactus.x + this->cactusDistance;
+
+        ++this->frame;
     }
 
     void draw()
     {
-        /*
-        if( (dino.frame % (scoreInterval / 2)) != 0)
-            Sprites::drawSelfMasked(x, y, pteroImg, 0);
+        if((this->frame % this->step) / 4 != 0)
+            Sprites::drawSelfMasked(this->x, this->y, pteroImg, 0);
         else
-            Sprites::drawSelfMasked(x, y, pteroImg, 2);
-
-        */
+            Sprites::drawSelfMasked(this->x, this->y, pteroImg, 2);
     }
 };
 Ptero ptero;

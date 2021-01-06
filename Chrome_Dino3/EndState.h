@@ -6,20 +6,20 @@ struct EndState
     void update()
     {
         if(gamePlay.score > data.highscores[2].score && !dino.autoJump)
-            gameState = ChromeDino::NameEntry;
+            gameState = GameState::NameEntry;
         
 
         if(arduboy.justPressed(B_BUTTON))
-            gameState = ChromeDino::HighScore;
+            gameState = GameState::HighScore;
         else if(arduboy.justPressed(A_BUTTON))
-            gameState = ChromeDino::Menu;
+            gameState = GameState::Menu;
     }
 
     void draw()
     {
-        arduboy.drawLine(0, 20, Dimensions::width, 20);
-        Sprites::drawSelfMasked( (Dimensions::width - dinoDuckWidth) / 2, 12, dinoDuckImg, 2 );
-        Sprites::drawSelfMasked( 20, (21 - cactusHeight), cactusImg, 0 );
+        arduboy.drawLine(0, 20, Arduboy2::width(), 20);
+        Sprites::drawSelfMasked((Arduboy2::width() - dinoDuckWidth) / 2, 12, dinoDuckImg, 2);
+        Sprites::drawSelfMasked(20, (21 - cactusHeight), cactusImg, 0);
 
         arduboy.setCursor( textToMiddle(10), 22 );
         arduboy.print(F("GAME OVER!"));
@@ -34,8 +34,6 @@ struct EndState
 
         arduboy.setCursor( textToMiddle(12), 52 );
         arduboy.print(F("B:Highscores"));
-
-        arduboy.display();
     }
 };
 EndState endState;

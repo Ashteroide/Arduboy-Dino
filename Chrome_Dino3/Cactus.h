@@ -3,27 +3,41 @@
 // Cactus
 struct Cactus
 {
-    float x = Dimensions::width;
+    float x = Arduboy2::width();
     uint16_t y = 43;
     float spd = 2;
     float accel = 0.02;
+    bool spawnPtero = false;
 
     void update()
     {
-        if(x > -20)
-            x -= spd;
+        if(spawnPtero)
+        {
+            if(this->x > -20)
+                this->x -= spd;
+            else
+            {
+                this->x = Arduboy2::width() + random( (cactusWidth * 2), (Arduboy2::width() * 2) );
+                this->spd += this->accel;
+            }
+            
+        }
         else
         {
-            x = Dimensions::width + random(cactusWidth, Dimensions::width);
-            spd += accel;
-            ptero.spawn = true;
+            if(this->x > -20)
+                this->x -= this->spd;
+            else
+            {
+                this->x = Arduboy2::width() + random(cactusWidth, Arduboy2::width());
+                this->spd += this->accel;
+            }
         }
 
     }
 
     void draw()
     {
-        Sprites::drawSelfMasked(x, y, cactusImg, 0);
+        Sprites::drawSelfMasked(this->x, this->y, cactusImg, 0);
     }
 };
 Cactus cactus;

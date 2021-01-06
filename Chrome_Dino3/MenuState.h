@@ -3,20 +3,24 @@
 // MenuState
 struct MenuState
 {
+    bool soundMode = true;
+
     void reset()
     {
-        cactus.x = Dimensions::width;
+        cactus.x = Arduboy2::width();
         cactus.spd = 2;
         cactus.accel = 0.02;
 
-        cloud.x = Dimensions::width + cloudWidth;
+        cactus.spawnPtero = false;
+        ptero.x = Arduboy2::width();
+
+        cloud.x = Arduboy2::width() + cloudWidth;
 
         arduboy.initRandomSeed();
 
-        dinoState = DinoState::Running;
+        dinoState = DinoState::updateRunningState;
 
         gamePlay.score = 0;
-        dino.frame = 0;
 
         data.load();
     }
@@ -25,7 +29,7 @@ struct MenuState
     {
         if(arduboy.justPressed(A_BUTTON) && menuCursor == MenuCursor::Start)
         {
-            gameState = ChromeDino::Game;
+            gameState = GameState::Game;
             reset();
         }
 
@@ -67,7 +71,7 @@ struct MenuState
 
         arduboy.setCursorY(46);
 
-        if(dino.soundMode)
+        if(this->soundMode)
         {
             arduboy.setCursorX(textToMiddle(8));
             arduboy.print(F("Sound:On"));
@@ -77,17 +81,21 @@ struct MenuState
             arduboy.setCursorX(textToMiddle(9));
             arduboy.print(F("Sound:Off"));
         }
+        
     }
 
     void updateSound()
     {
         if(arduboy.justPressed(A_BUTTON))
-            dino.soundMode = !dino.soundMode;
+        {
+            arduboy.audio.toggle();
+            this->soundMode = !this->soundMode;
+        }
 
         if(arduboy.justPressed(UP_BUTTON))
             menuCursor = MenuCursor::AI;
 
-        arduboy.setCursor( (textToMiddle(4) / 2), 46);
+        arduboy.setCursor((textToMiddle(4) / 2), 46);
         arduboy.print(F("A>"));
     }
 
@@ -101,7 +109,7 @@ struct MenuState
         else if(arduboy.justPressed(DOWN_BUTTON))
             menuCursor = MenuCursor::Sound;
 
-        arduboy.setCursor( (textToMiddle(11) / 2), 38);
+        arduboy.setCursor((textToMiddle(11) / 2), 38);
         arduboy.print(F("A>"));
     }
 
@@ -110,7 +118,7 @@ struct MenuState
         if(arduboy.justPressed(DOWN_BUTTON) && menuCursor != MenuCursor::AI)
             menuCursor = MenuCursor::AI;
 
-        arduboy.setCursor( (textToMiddle(8) / 2), 30);
+        arduboy.setCursor((textToMiddle(8) / 2), 30);
         arduboy.print(F("A>"));
     }
 };

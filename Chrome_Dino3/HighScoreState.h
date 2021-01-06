@@ -6,29 +6,28 @@ struct HighScoreState
     void update()
     {
         if(arduboy.justPressed(B_BUTTON))
-            gameState = ChromeDino::Menu;
+            gameState = GameState::Menu;
     }
 
     void draw()
     {
-        arduboy.setCursor( textToMiddle(10), 5);
+        arduboy.setCursor(textToMiddle(10), 5);
         arduboy.print(F("Highscores:"));
 
         for(size_t index = 0; index < 3; ++index)
         {
-            arduboy.setCursorY( (15 + (index * 10)) );
-
-            arduboy.setCursorX( textToMiddle(countDigits(data.highscores[index].score) + 5) );
+            arduboy.setCursorY((15 + (index * 10)));
+            arduboy.setCursorX(textToMiddle(countDigits(data.highscores[index].score) + 5));
 
             arduboy.print(index + 1);
             arduboy.print(F(":"));
             arduboy.print(data.highscores[index].score);
             arduboy.print(F(" "));
-            for(size_t letterIndex = 0; letterIndex < 3; ++letterIndex)
-                arduboy.print(data.highscores[index].name[letterIndex]);
+
+            arduboy.write(data.highscores[index].name, 3);
         }
 
-        arduboy.setCursor( textToMiddle(9), 45);
+        arduboy.setCursor(textToMiddle(9), 45);
         arduboy.print(F("B:Restart"));
     }
 };

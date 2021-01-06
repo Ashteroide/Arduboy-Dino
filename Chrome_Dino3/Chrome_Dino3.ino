@@ -10,14 +10,6 @@ ArduboyTones sound(arduboy.audio.enabled);
 
 #include "Images.h"
 
-// Screen Structure
-struct Dimensions
-{
-    static constexpr uint8_t width = Arduboy2::width();
-    static constexpr uint8_t height = Arduboy2::height();
-};
-Dimensions;
-
 // Menu Cusor
 enum class MenuCursor
 {
@@ -28,7 +20,7 @@ enum class MenuCursor
 MenuCursor menuCursor = MenuCursor::Start;
 
 // Game State
-enum class ChromeDino
+enum class GameState
 {
     Menu,
     Game,
@@ -36,46 +28,33 @@ enum class ChromeDino
     HighScore,
     NameEntry
 };
-ChromeDino gameState = ChromeDino::Menu;
+GameState gameState = GameState::Menu;
 
-#include "TextToMiddle.h"
+#include "Utilities.h"
 
 #include "Data.h"
 
 // DinoState
 enum class DinoState
 {
-    Jumping,
-    Falling,
-    Running,
-    Ducking,
+    updateJumpingState,
+    updateFallingState,
+    updateRunningState,
+    updateDuckingState,
 };
-DinoState dinoState = DinoState::Running;
+DinoState dinoState = DinoState::updateRunningState;
 
-#include "Ptero.h"
-#include "Cactus.h"
-#include "Cloud.h"
-#include "Dino.h"
-
-#include "SetCursorForScore.h"
-
-#include "GamePlay.h"
-
+#include "GamePlayState.h"
 #include "MenuState.h"
 #include "EndState.h"
 
 #include "Alphabet.h"
-
-#include "CountDigits.h"
-
-#include "HighScores.h"
-#include "NameEntry.h"
+#include "HighScoreState.h"
+#include "NameEntryState.h"
 
 void setup()
 {
     arduboy.begin();
-    arduboy.clear();
-
     // clearSaveData();
 }
 
@@ -90,28 +69,27 @@ void loop()
 
     switch(gameState)
     {
-        case ChromeDino::Menu:
+        case GameState::Menu:
             menuState.update();
             menuState.draw();
             break;
 
-        case ChromeDino::Game:
+        case GameState::Game:
             gamePlay.update();
             gamePlay.draw();
             break;
 
-        case ChromeDino::End:
+        case GameState::End:
             endState.update();
             endState.draw();
             break;
         
-        case ChromeDino::HighScore:
+        case GameState::HighScore:
             highScoreState.update();
             highScoreState.draw();
             break;
 
-        case ChromeDino::NameEntry:
-            nameEntry.updateNameCursor();
+        case GameState::NameEntry:
             nameEntry.update();
             nameEntry.draw();
             break;
