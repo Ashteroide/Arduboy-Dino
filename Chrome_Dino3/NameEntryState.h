@@ -1,7 +1,7 @@
 #pragma once
 
 // NameEntryState
-struct NameEntry
+struct NameEntryState
 {
     uint8_t nameCursor;
     uint8_t letter[3];
@@ -78,4 +78,3 @@ struct NameEntry
             this->letter[this->nameCursor] -= 1;
     }
 };
-NameEntry nameEntry;

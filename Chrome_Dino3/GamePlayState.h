@@ -38,4 +38,3 @@ struct GamePlayState
         cloud.draw();
     }
 };
-GamePlayState gamePlay;

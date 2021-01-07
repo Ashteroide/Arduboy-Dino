@@ -36,4 +36,3 @@ struct EndState
         arduboy.print(F("B:Highscores"));
     }
 };
-EndState endState;

@@ -31,4 +31,3 @@ struct HighScoreState
         arduboy.print(F("B:Restart"));
     }
 };
-HighScoreState highScoreState;

@@ -3,8 +3,6 @@
 // MenuState
 struct MenuState
 {
-    bool soundMode = true;
-
     void reset()
     {
         cactus.x = Arduboy2::width();
@@ -69,28 +67,18 @@ struct MenuState
             arduboy.print(F("AutoJump:Off"));
         }
 
+        arduboy.setCursorX(arduboy.audio.enabled() ? textToMiddle(8) : textToMiddle(9));
         arduboy.setCursorY(46);
 
-        if(this->soundMode)
-        {
-            arduboy.setCursorX(textToMiddle(8));
-            arduboy.print(F("Sound:On"));
-        }
-        else
-        {
-            arduboy.setCursorX(textToMiddle(9));
-            arduboy.print(F("Sound:Off"));
-        }
+        arduboy.print(F("Sound:"));
+        arduboy.print(arduboy.audio.enabled() ? F("On") : F("Off"));
         
     }
 
     void updateSound()
     {
         if(arduboy.justPressed(A_BUTTON))
-        {
             arduboy.audio.toggle();
-            this->soundMode = !this->soundMode;
-        }
 
         if(arduboy.justPressed(UP_BUTTON))
             menuCursor = MenuCursor::AI;
@@ -122,4 +110,3 @@ struct MenuState
         arduboy.print(F("A>"));
     }
 };
-MenuState menuState;
