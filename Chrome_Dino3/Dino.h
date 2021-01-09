@@ -3,7 +3,7 @@
 // Dino
 struct Dino
 {
-    static constexpr uint8_t animationStep = 6;
+    static constexpr uint8_t animationStep = 12;
     static constexpr uint8_t maxJumpHeight = 8;
     static constexpr uint8_t groundHeight = 62;
     static constexpr uint8_t x = 5;
@@ -54,6 +54,8 @@ struct Dino
             this->dinoFrameCounter = 0;
         else
             ++this->dinoFrameCounter;
+
+        arduboy.print(this->dinoFrameCounter);
     }
 
     void updateRunningState()
@@ -81,7 +83,7 @@ struct Dino
             sound.tone(250, 50);
         }
 
-        if(this->dinoFrameCounter <= this->animationStep)
+        if(this->dinoFrameCounter <= this->animationStep / 2)
             Sprites::drawSelfMasked(this->x, this->y, dinoImg, 2);
         else
             Sprites::drawSelfMasked(this->x, this->y, dinoImg, 1);
@@ -114,7 +116,7 @@ struct Dino
 
         this->y = this->groundHeight - dinoDuckHeight;
 
-        if(this->dinoFrameCounter <= this->animationStep)
+        if(this->dinoFrameCounter <= this->animationStep / 2)
             Sprites::drawSelfMasked(this->x, this->y, dinoDuckImg, 1);
         else
             Sprites::drawSelfMasked(this->x, this->y, dinoDuckImg, 0);
