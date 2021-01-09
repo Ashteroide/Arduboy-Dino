@@ -12,6 +12,10 @@ struct Dino
     int8_t jumpVelocity = 0;
     bool autoJump = false;
 
+    // Dino Collision Points
+    int16_t dinoBottom;
+    int16_t dinoRight;
+
     void update()
     {
         switch(dinoState)
@@ -32,9 +36,12 @@ struct Dino
                 updateDuckingState();
                 break;
         }
+
+        this->dinoBottom = y + dinoHeight;
+        this->dinoRight = (x + dinoWidth) - 4;
         
         // Collision Detection
-        if((this->y + dinoHeight) > cactus.y && (this->x + dinoWidth - 4) > cactus.x && (this->x + dinoWidth - 4) < cactus.x + cactusWidth)
+        if(this->dinoBottom > cactus.y && this->dinoRight > cactus.x && this->dinoRight < cactus.cactusRight)
         {
             gameState = GameState::End;
 

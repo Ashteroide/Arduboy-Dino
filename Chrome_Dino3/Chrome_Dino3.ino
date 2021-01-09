@@ -1,5 +1,5 @@
 // Chrome Dino v3
-// Created: 22 October, 2020
+// Created: 25 November, 2020
 // Ashlee J (Ashteroide)
 
 #include <Arduboy2.h>

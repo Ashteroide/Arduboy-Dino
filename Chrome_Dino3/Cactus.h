@@ -9,8 +9,13 @@ struct Cactus
     float accel = 0.02;
     bool spawnPtero = false;
 
+    // Cactus Collision Points
+    int16_t cactusRight;
+
     void update()
     {
+        this->cactusRight = this->x + cactusWidth;
+
         if(spawnPtero)
         {
             if(this->x > -20)

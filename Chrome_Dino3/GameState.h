@@ -1,7 +1,7 @@
 #pragma once
 
 // Game State
-enum class GameState
+enum class GameState : uint8_t
 {
     Menu,
     Game,
