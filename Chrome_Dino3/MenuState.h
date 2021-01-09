@@ -55,17 +55,9 @@ struct MenuState
         arduboy.print(F("Start Game"));
 
         arduboy.setCursorY(38);
-
-        if(dino.autoJump)
-        {
-            arduboy.setCursorX(textToMiddle(11));
-            arduboy.print(F("AutoJump:On"));
-        }
-        else
-        {
-            arduboy.setCursorX(textToMiddle(12));
-            arduboy.print(F("AutoJump:Off"));
-        }
+        arduboy.setCursorX(textToMiddle(dino.autoJump ? 11 : 12));
+        arduboy.print(F("Autojump:"));
+        arduboy.print(dino.autoJump ? F("On") : F("Off"));
 
         arduboy.setCursorX(arduboy.audio.enabled() ? textToMiddle(8) : textToMiddle(9));
         arduboy.setCursorY(46);

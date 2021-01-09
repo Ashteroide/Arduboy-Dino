@@ -43,8 +43,8 @@ struct Dino
 
         this->y += this->jumpVelocity;
 
-        if(this->dinoFrameCounter > this->animationStep)
-            this->dinoFrameCounter = 1;
+        if(this->dinoFrameCounter >= this->animationStep)
+            this->dinoFrameCounter = 0;
         else
             ++this->dinoFrameCounter;
     }
