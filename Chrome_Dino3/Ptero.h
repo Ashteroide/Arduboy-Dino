@@ -27,4 +27,3 @@ struct Ptero
             Sprites::drawSelfMasked(this->x, this->y, pteroImg, 2);
     }
 };
-Ptero ptero;

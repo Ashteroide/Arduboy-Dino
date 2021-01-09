@@ -1,9 +1,13 @@
 #pragma once
 
 #include "Cactus.h"
+Cactus cactus;
 #include "Ptero.h"
+Ptero ptero;
 #include "Cloud.h"
+Cloud cloud;
 #include "Dino.h"
+Dino dino;
 
 // GamePlayState
 struct GamePlayState

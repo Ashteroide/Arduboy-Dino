@@ -122,4 +122,3 @@ struct Dino
             Sprites::drawSelfMasked(this->x, this->y, dinoDuckImg, 0);
     }
 };
-Dino dino;

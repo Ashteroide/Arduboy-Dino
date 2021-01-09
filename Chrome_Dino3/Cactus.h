@@ -45,4 +45,3 @@ struct Cactus
         Sprites::drawSelfMasked(this->x, this->y, cactusImg, 0);
     }
 };
-Cactus cactus;

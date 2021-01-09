@@ -20,4 +20,3 @@ struct Cloud
         Sprites::drawSelfMasked(this->x, this->y, cloudImg, 0);
     }
 };
-Cloud cloud;
