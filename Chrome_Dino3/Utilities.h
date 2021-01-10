@@ -7,7 +7,7 @@ inline int textToMiddle(int charWidth)
 }
 
 // SetCursorForScore
-void setCursorForScore(uint8_t x, uint8_t y, uint8_t score)
+void setCursorForScore(uint8_t x, uint8_t y, uint16_t score)
 {
     arduboy.setCursorY(y);
 

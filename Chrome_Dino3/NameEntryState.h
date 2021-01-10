@@ -38,9 +38,9 @@ struct NameEntryState
         for (size_t index = 0; index < 3; index++)
             arduboy.print(alphabet[this->letter[index]]);
 
-        arduboy.setCursor(textToMiddle(6 + countDigits(gamePlay.score)), 35);
+        arduboy.setCursor(textToMiddle(6 + countDigits(score)), 35);
         arduboy.print(F("Score:"));
-        arduboy.print(gamePlay.score);
+        arduboy.print(score);
 
         arduboy.setCursor(textToMiddle(12), 45);
         arduboy.print(F("A:Enter Name"));
@@ -50,12 +50,12 @@ struct NameEntryState
     {
         for(size_t index = 0; index < 3; ++index)
         {
-            if(gamePlay.score > data.highscores[index].score)
+            if(score > data.highscores[index].score)
             {
                 for(size_t nextIndex = 2; nextIndex > index; --nextIndex)
                     data.highscores[nextIndex] = data.highscores[nextIndex - 1];
 
-                data.highscores[index].score = gamePlay.score;
+                data.highscores[index].score = score;
 
                 for(size_t letterIndex = 0; letterIndex < 3; ++letterIndex)
                     data.highscores[index].name[letterIndex] = alphabet[this->letter[letterIndex]];

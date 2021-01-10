@@ -3,8 +3,8 @@
 #pragma once
 #include <stdint.h>
 
-constexpr uint8_t cloudWidth = 24;
-constexpr uint8_t cloudHeight = 7;
+constexpr int8_t cloudWidth = 24;
+constexpr int8_t cloudHeight = 7;
 
 const unsigned char cloudImg[] PROGMEM = {
   // Dimensions

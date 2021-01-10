@@ -3,8 +3,8 @@
 // DinoState
 enum class DinoState
 {
-    updateJumpingState,
-    updateFallingState,
-    updateRunningState,
-    updateDuckingState,
+    JumpingState,
+    FallingState,
+    RunningState,
+    DuckingState,
 };

@@ -9,16 +9,13 @@ struct MenuState
         cactus.spd = 2;
         cactus.accel = 0.02;
 
-        cactus.spawnPtero = false;
-        ptero.x = Arduboy2::width();
-
         cloud.x = Arduboy2::width() + cloudWidth;
 
         arduboy.initRandomSeed();
 
-        dinoState = DinoState::updateRunningState;
+        dino.state = DinoState::RunningState;
 
-        gamePlay.score = 0;
+        score = 0;
 
         data.load();
     }

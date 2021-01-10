@@ -1,8 +1,12 @@
 #pragma once
 
+#include "DinoState.h"
+
 // Dino
 struct Dino
 {
+    DinoState state = DinoState::RunningState;
+
     static constexpr uint8_t animationStep = 12;
     static constexpr uint8_t maxJumpHeight = 8;
     static constexpr uint8_t groundHeight = 62;
@@ -18,21 +22,21 @@ struct Dino
 
     void update()
     {
-        switch(dinoState)
+        switch(this->state)
         {
-            case DinoState::updateRunningState:
+            case DinoState::RunningState:
                 updateRunningState();
                 break;
             
-            case DinoState::updateJumpingState:
+            case DinoState::JumpingState:
                 updateJumpingState();
                 break;
 
-            case DinoState::updateFallingState:
+            case DinoState::FallingState:
                 updateFallingState();
                 break;
 
-            case DinoState::updateDuckingState:
+            case DinoState::DuckingState:
                 updateDuckingState();
                 break;
         }
@@ -66,19 +70,19 @@ struct Dino
         if(this->autoJump)
         {
             if(cactus.x - (this->x + cactusWidth) < (cactus.spd * cactusHeight) && (cactus.x - this->x) > 5)
-                dinoState = DinoState::updateJumpingState;
+                this->state = DinoState::JumpingState;
         }
 
         if(arduboy.justPressed(UP_BUTTON))
         {
-            dinoState = DinoState::updateJumpingState;
+            this->state = DinoState::JumpingState;
 
             sound.tone(500, 50);
         }
 
         else if(arduboy.pressed(DOWN_BUTTON))
         {
-            dinoState = DinoState::updateDuckingState;
+            this->state = DinoState::DuckingState;
 
             sound.tone(250, 50);
         }
@@ -92,7 +96,7 @@ struct Dino
     void updateJumpingState()
     {
         if(this->y <= this->maxJumpHeight)
-            dinoState = DinoState::updateFallingState;
+            this->state = DinoState::FallingState;
         else
             this->jumpVelocity = -2;
 
@@ -102,7 +106,7 @@ struct Dino
     void updateFallingState()
     {
         if(this->y >= (this->groundHeight - dinoHeight))
-            dinoState = DinoState::updateRunningState;
+            this->state = DinoState::RunningState;
         else
             this->jumpVelocity = 2;
 
@@ -112,7 +116,7 @@ struct Dino
     void updateDuckingState()
     {
         if(arduboy.justReleased(DOWN_BUTTON))
-            dinoState = DinoState::updateRunningState;
+            this->state = DinoState::RunningState;
 
         this->y = this->groundHeight - dinoDuckHeight;
 

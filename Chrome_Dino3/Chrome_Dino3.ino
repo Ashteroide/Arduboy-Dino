@@ -10,32 +10,26 @@ ArduboyTones sound(arduboy.audio.enabled);
 
 #include "Images.h"
 
+uint16_t score = 0;
+
 #include "MenuCursor.h"
 MenuCursor menuCursor = MenuCursor::Start;
-
 #include "GameState.h"
 GameState gameState = GameState::Menu;
 
 #include "Utilities.h"
-
 #include "Data.h"
-
-#include "DinoState.h"
-DinoState dinoState = DinoState::updateRunningState;
 
 #include "GamePlayState.h"
 GamePlayState gamePlay;
-
 #include "MenuState.h"
 MenuState menuState;
-
 #include "EndState.h"
 EndState endState;
 
 #include "Alphabet.h"
 #include "HighScoreState.h"
 HighScoreState highScoreState;
-
 #include "NameEntryState.h"
 NameEntryState nameEntryState;
 

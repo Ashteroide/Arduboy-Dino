@@ -5,7 +5,7 @@ struct EndState
 {
     void update()
     {
-        if(gamePlay.score > data.highscores[2].score && !dino.autoJump)
+        if(score > data.highscores[2].score && !dino.autoJump)
             gameState = GameState::NameEntry;
         
 
@@ -24,10 +24,10 @@ struct EndState
         arduboy.setCursor( textToMiddle(10), 22 );
         arduboy.print(F("GAME OVER!"));
 
-        setCursorForScore(8, 32, gamePlay.score);
+        setCursorForScore(8, 32, score);
 
         arduboy.print(F("Score:"));
-        arduboy.print(gamePlay.score);
+        arduboy.print(score);
 
         arduboy.setCursor( textToMiddle(9), 42 );
         arduboy.print(F("A:Restart"));
