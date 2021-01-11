@@ -5,6 +5,5 @@ enum class DinoState
 {
     JumpingState,
     FallingState,
-    RunningState,
-    DuckingState,
+    RunningState
 };

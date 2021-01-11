@@ -18,7 +18,7 @@ struct GamePlayState
         cactus.update();
         cloud.update();
 
-        if(arduboy.everyXFrames(10))
+        if(arduboy.everyXFrames(5))
             ++score;
     }
 

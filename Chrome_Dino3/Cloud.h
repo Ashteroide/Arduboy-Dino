@@ -3,7 +3,7 @@
 // Cloud
 struct Cloud
 {
-    uint16_t x = Arduboy2::width() + cloudWidth;
+    int16_t x = Arduboy2::width() + cloudWidth;
     uint8_t y = 10;
     uint8_t spd = 1;
 

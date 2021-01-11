@@ -35,10 +35,6 @@ struct Dino
             case DinoState::FallingState:
                 updateFallingState();
                 break;
-
-            case DinoState::DuckingState:
-                updateDuckingState();
-                break;
         }
 
         this->dinoBottom = y + dinoHeight;
@@ -58,8 +54,6 @@ struct Dino
             this->dinoFrameCounter = 0;
         else
             ++this->dinoFrameCounter;
-
-        arduboy.print(this->dinoFrameCounter);
     }
 
     void updateRunningState()
@@ -78,13 +72,6 @@ struct Dino
             this->state = DinoState::JumpingState;
 
             sound.tone(500, 50);
-        }
-
-        else if(arduboy.pressed(DOWN_BUTTON))
-        {
-            this->state = DinoState::DuckingState;
-
-            sound.tone(250, 50);
         }
 
         if(this->dinoFrameCounter <= this->animationStep / 2)
@@ -111,18 +98,5 @@ struct Dino
             this->jumpVelocity = 2;
 
         Sprites::drawSelfMasked(this->x, this->y, dinoImg, 0);
-    }
-
-    void updateDuckingState()
-    {
-        if(arduboy.justReleased(DOWN_BUTTON))
-            this->state = DinoState::RunningState;
-
-        this->y = this->groundHeight - dinoDuckHeight;
-
-        if(this->dinoFrameCounter <= this->animationStep / 2)
-            Sprites::drawSelfMasked(this->x, this->y, dinoDuckImg, 1);
-        else
-            Sprites::drawSelfMasked(this->x, this->y, dinoDuckImg, 0);
     }
 };

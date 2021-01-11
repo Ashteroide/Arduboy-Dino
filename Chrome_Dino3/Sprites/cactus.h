@@ -3,8 +3,8 @@
 #pragma once
 #include <stdint.h>
 
-constexpr uint8_t cactusWidth = 10;
-constexpr uint8_t cactusHeight = 20;
+constexpr int8_t cactusWidth = 10;
+constexpr int8_t cactusHeight = 20;
 
 const unsigned char cactusImg[] PROGMEM = {
   // Dimensions
